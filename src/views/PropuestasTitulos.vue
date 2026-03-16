@@ -1,11 +1,13 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
 import { generateProposals } from '@/services/api'
 
 const router = useRouter()
 const store = useWizardStore()
+const SAVED_SELECTIONS_KEY = 'upao_saved_title_selection'
+const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000
 
 const selectedIndices = ref([])
 const isLoading = computed(() => store.step4.status === 'loading')
@@ -13,11 +15,17 @@ const proposals = computed(() => store.step4.proposals)
 const hasError = computed(() => store.step4.status === 'error')
 const errorMessage = computed(() => store.step4.error)
 const canRetry = computed(() => store.step4.retryable)
+const savedTitles = computed(() => store.step4.selectedTitles)
+const savedTitleSet = computed(() => new Set(savedTitles.value.map((item) => item.t)))
+const hasSavedSelection = computed(() => savedTitles.value.length > 0)
+const saveSelectionLabel = computed(() => 'Guardar Selección')
 
 onMounted(() => {
+  purgeExpiredSavedSelection()
   if (!store.isStep3Complete) {
     router.push('/paso-3')
   }
+  restoreSavedSelection()
 })
 
 const toggleSelection = (index) => {
@@ -30,19 +38,161 @@ const toggleSelection = (index) => {
 }
 
 const hasSelection = computed(() => selectedIndices.value.length > 0)
+const selectedProposals = computed(() => selectedIndices.value.map((index) => proposals.value[index]).filter(Boolean))
 
-const downloadSelection = () => {
+watch(proposals, () => {
+  restoreSavedSelection()
+})
+
+const purgeExpiredSavedSelection = () => {
+  try {
+    const saved = localStorage.getItem(SAVED_SELECTIONS_KEY)
+    if (!saved) return
+
+    const parsed = JSON.parse(saved)
+    if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
+      localStorage.removeItem(SAVED_SELECTIONS_KEY)
+    }
+  } catch {
+    localStorage.removeItem(SAVED_SELECTIONS_KEY)
+  }
+}
+
+const restoreSavedSelection = () => {
+  if (!proposals.value.length) return
+
+  try {
+    const saved = localStorage.getItem(SAVED_SELECTIONS_KEY)
+    if (!saved) return
+
+    const parsed = JSON.parse(saved)
+    if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
+      localStorage.removeItem(SAVED_SELECTIONS_KEY)
+      return
+    }
+
+    const savedTitles = new Set((parsed.items || []).map((item) => item.t))
+    selectedIndices.value = proposals.value
+      .map((item, index) => savedTitles.has(item.t) ? index : -1)
+      .filter((index) => index !== -1)
+    store.setSavedSelection({
+      titles: (parsed.items || []),
+      expiresAt: parsed.expiresAt
+    })
+  } catch {
+    localStorage.removeItem(SAVED_SELECTIONS_KEY)
+  }
+}
+
+const saveSelection = () => {
   if (!hasSelection.value) return
-  alert(`Descargando ${selectedIndices.value.length} propuestas seleccionadas...`)
+
+  const expiresAt = Date.now() + FIVE_DAYS_IN_MS
+  const payload = {
+    savedAt: Date.now(),
+    expiresAt,
+    items: selectedProposals.value,
+    sessionId: store.step4.sessionId,
+    linea: store.step1.domain,
+    sublinea: store.step1.subline
+  }
+
+  localStorage.setItem(SAVED_SELECTIONS_KEY, JSON.stringify(payload))
+
+  const expirationText = new Date(expiresAt).toLocaleDateString('es-PE')
+  alert(`La selección se guardó temporalmente en este dispositivo hasta el ${expirationText}.`)
+  store.setSavedSelection({
+    titles: selectedProposals.value,
+    expiresAt
+  })
+}
+
+const escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+
+const splitSpatialTemporal = (value) => {
+  const raw = String(value || '')
+  const lastCommaIndex = raw.lastIndexOf(',')
+  if (lastCommaIndex === -1) {
+    return {
+      espacio: raw,
+      tiempo: ''
+    }
+  }
+
+  return {
+    espacio: raw.slice(0, lastCommaIndex).trim(),
+    tiempo: raw.slice(lastCommaIndex + 1).trim()
+  }
 }
 
 const exportFormat = () => {
   if (!hasSelection.value) return
-  alert(`Exportando ${selectedIndices.value.length} propuestas al Formato Excel Oficial UPAO...`)
+
+  const rows = selectedProposals.value.map((item, index) => {
+    const { espacio, tiempo } = splitSpatialTemporal(item.s)
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(item.t)}</td>
+        <td>${escapeHtml(item.v1)}</td>
+        <td>${escapeHtml(item.c)}</td>
+        <td>${escapeHtml(item.v2)}</td>
+        <td>${escapeHtml(item.u)}</td>
+        <td>${escapeHtml(espacio)}</td>
+        <td>${escapeHtml(tiempo)}</td>
+      </tr>
+    `
+  }).join('')
+
+  const html = `
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+      </head>
+      <body>
+        <table border="1">
+          <tr>
+            <th>N</th>
+            <th>Titulo</th>
+            <th>Variable 1</th>
+            <th>Conector</th>
+            <th>Variable 2</th>
+            <th>Unidad de Investigacion</th>
+            <th>Espacio</th>
+            <th>Tiempo</th>
+          </tr>
+          ${rows}
+        </table>
+      </body>
+    </html>
+  `
+
+  const blob = new Blob([html], {
+    type: 'application/vnd.ms-excel;charset=utf-8;'
+  })
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'formato_oficial_titulos_upao.xls'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 const goBack = () => {
   router.push('/paso-3')
+}
+
+const startNewTitleFlow = () => {
+  localStorage.removeItem(SAVED_SELECTIONS_KEY)
+  store.resetWizard()
+  router.push('/paso-1')
 }
 
 const retryGeneration = async () => {
@@ -95,12 +245,12 @@ const retryGeneration = async () => {
         </div>
         <div class="flex gap-3">
           <button 
-            @click="downloadSelection"
+            @click="saveSelection"
             class="bg-surface border-2 border-primary text-primary px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
             :class="hasSelection ? 'hover:bg-primary hover:text-white cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
           >
-            <span class="material-symbols-outlined text-lg">download</span>
-            Descargar Selección
+            <span class="material-symbols-outlined text-lg">save</span>
+            {{ saveSelectionLabel }}
           </button>
           
           <button 
@@ -109,7 +259,7 @@ const retryGeneration = async () => {
              :class="hasSelection ? 'hover:brightness-110 shadow-lg shadow-secondary/20 cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
           >
             <span class="material-symbols-outlined text-lg">description</span>
-            Exportar Formato Oficial
+            Exportar Titulos a Excel
           </button>
         </div>
       </header>
@@ -118,7 +268,7 @@ const retryGeneration = async () => {
       <div class="mb-10 p-4 bg-amber-50 border-l-4 border-amber-400 flex items-center gap-3">
         <span class="material-symbols-outlined text-amber-600">info</span>
         <p class="text-sm text-amber-800 font-medium">
-          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor.
+          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor. La selección guardada se conserva solo en este dispositivo durante 5 días.
         </p>
       </div>
 
@@ -145,7 +295,7 @@ const retryGeneration = async () => {
           v-for="(item, index) in proposals" 
           :key="index"
           class="block bg-surface border rounded-none cursor-pointer overflow-hidden group transition-all duration-200"
-          :class="selectedIndices.includes(index) ? 'border-primary shadow-[0_10px_15px_-3px_rgba(0,86,163,0.1)]' : 'border-border-color hover:border-primary/50'"
+          :class="selectedIndices.includes(index) ? 'border-primary shadow-[0_10px_15px_-3px_rgba(0,86,163,0.1)]' : savedTitleSet.has(item.t) ? 'border-emerald-500 shadow-[0_10px_15px_-3px_rgba(16,185,129,0.12)]' : 'border-border-color hover:border-primary/50'"
         >
           <input 
             type="checkbox" 
@@ -157,15 +307,23 @@ const retryGeneration = async () => {
           <div class="flex items-stretch transition-colors" :class="selectedIndices.includes(index) ? 'bg-primary/5' : ''">
             
             <div class="w-16 flex items-center justify-center border-r transition-colors"
-                 :class="selectedIndices.includes(index) ? 'border-primary bg-primary text-white' : 'border-border-color text-text-muted group-hover:bg-primary/5 group-hover:text-primary'">
+                 :class="selectedIndices.includes(index) ? 'border-primary bg-primary text-white' : savedTitleSet.has(item.t) ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-border-color text-text-muted group-hover:bg-primary/5 group-hover:text-primary'">
               <span class="material-symbols-outlined transition-transform"
-                    :class="selectedIndices.includes(index) ? 'scale-110' : ''">
-                {{ selectedIndices.includes(index) ? 'check_circle' : 'add_circle' }}
+                    :class="selectedIndices.includes(index) || savedTitleSet.has(item.t) ? 'scale-110' : ''">
+                {{ selectedIndices.includes(index) ? 'check_circle' : savedTitleSet.has(item.t) ? 'bookmark_added' : 'add_circle' }}
               </span>
             </div>
             
             <div class="flex-1 p-6">
-              <h3 class="font-display font-bold text-lg text-primary mb-4 leading-snug">{{ item.t }}</h3>
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <h3 class="font-display font-bold text-lg text-primary leading-snug">{{ item.t }}</h3>
+                <span
+                  v-if="savedTitleSet.has(item.t)"
+                  class="shrink-0 text-[10px] font-bold uppercase tracking-[0.08em] px-2 py-1 rounded-sm bg-emerald-100 text-emerald-700"
+                >
+                  Guardado
+                </span>
+              </div>
               
               <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
                 <div>
@@ -216,12 +374,15 @@ const retryGeneration = async () => {
         
         <div class="flex items-center gap-4">
           <span class="text-xs font-bold text-primary uppercase tracking-widest">Paso final completado</span>
-          <div class="flex gap-1">
-            <div class="w-2 h-2 rounded-full bg-primary animate-pulse" style="animation-delay: 0s"></div>
-            <div class="w-2 h-2 rounded-full bg-primary animate-pulse" style="animation-delay: 0.2s"></div>
-            <div class="w-2 h-2 rounded-full bg-primary animate-pulse" style="animation-delay: 0.4s"></div>
-            <div class="w-2 h-2 rounded-full bg-primary animate-pulse" style="animation-delay: 0.6s"></div>
-          </div>
+          
+          <button
+            @click="startNewTitleFlow"
+            type="button"
+            class="bg-primary text-white px-5 py-3 font-bold uppercase tracking-wider text-xs hover:bg-primary/90 transition-all flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-lg">refresh</span>
+            Generar Nuevo Titulo
+          </button>
         </div>
       </div>
     
