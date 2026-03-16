@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+__pycache__
+*.pyc
+backend/__pycache__
+backend/.pytest_cache
+postgres_data

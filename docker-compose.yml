@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: titulos-upao-db
+    env_file:
+      - backend/.env
+    environment:
+      POSTGRES_DB: ${BASE_NAME}
+      POSTGRES_USER: ${BASE_USER}
+      POSTGRES_PASSWORD: ${BASE_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${BASE_USER} -d ${BASE_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: titulos-upao-backend
+    env_file:
+      - backend/.env
+    environment:
+      BASE_HOST: postgres
+      BASE_PORT: 5432
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
