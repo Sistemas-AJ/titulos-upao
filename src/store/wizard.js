@@ -22,7 +22,11 @@ const defaultState = () => ({
     problem: ''
   },
   step4: {
-    selectedTitles: []
+    selectedTitles: [],
+    proposals: [],
+    sessionId: '',
+    status: 'idle',
+    error: ''
   }
 })
 
@@ -85,6 +89,32 @@ export const useWizardStore = defineStore('wizard', {
     },
     setStep4Selected(titles) {
       this.step4.selectedTitles = titles
+      this._persist()
+    },
+    startProposalGeneration() {
+      this.step4.proposals = []
+      this.step4.selectedTitles = []
+      this.step4.sessionId = ''
+      this.step4.error = ''
+      this.step4.status = 'loading'
+      this._persist()
+    },
+    setGeneratedProposals({ proposals, sessionId }) {
+      this.step4.proposals = proposals
+      this.step4.sessionId = sessionId
+      this.step4.error = ''
+      this.step4.status = 'success'
+      this._persist()
+    },
+    setProposalError(message) {
+      this.step4.proposals = []
+      this.step4.selectedTitles = []
+      this.step4.error = message
+      this.step4.status = 'error'
+      this._persist()
+    },
+    resetStep4() {
+      this.step4 = defaultState().step4
       this._persist()
     },
 

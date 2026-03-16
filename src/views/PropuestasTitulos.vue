@@ -2,29 +2,19 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
-import { generateProposals } from '@/services/api'
 
 const router = useRouter()
 const store = useWizardStore()
 
-const isLoading = ref(true)
-const proposals = ref([])
 const selectedIndices = ref([])
+const isLoading = computed(() => store.step4.status === 'loading')
+const proposals = computed(() => store.step4.proposals)
+const hasError = computed(() => store.step4.status === 'error')
+const errorMessage = computed(() => store.step4.error)
 
-onMounted(async () => {
-  // If we arrived here without completing step 3, redirect back
+onMounted(() => {
   if (!store.isStep3Complete) {
     router.push('/paso-3')
-    return
-  }
-
-  // Simulate API Call using the state
-  try {
-    proposals.value = await generateProposals(store.$state)
-  } catch (error) {
-    console.error("Failed to generate proposals:", error)
-  } finally {
-    isLoading.value = false
   }
 })
 
@@ -112,8 +102,16 @@ const goBack = () => {
         </p>
       </div>
 
+      <div v-if="hasError" class="mb-10 p-5 bg-red-50 border-l-4 border-red-400 flex items-start gap-3">
+        <span class="material-symbols-outlined text-red-600">error</span>
+        <div>
+          <p class="text-sm text-red-800 font-bold">No se pudieron generar las propuestas.</p>
+          <p class="text-sm text-red-700 mt-1">{{ errorMessage }}</p>
+        </div>
+      </div>
+
       <!-- Proposals List -->
-      <div class="space-y-4 flex-1">
+      <div v-if="proposals.length" class="space-y-4 flex-1">
         <label 
           v-for="(item, index) in proposals" 
           :key="index"
@@ -166,6 +164,14 @@ const goBack = () => {
             </div>
           </div>
         </label>
+      </div>
+
+      <div v-else-if="!hasError" class="flex-1 flex items-center justify-center border border-dashed border-border-color bg-background-light">
+        <div class="text-center px-8 py-16">
+          <span class="material-symbols-outlined text-5xl text-text-muted mb-4 block">hourglass_empty</span>
+          <p class="font-display font-bold text-xl text-text-main mb-2">Esperando resultados</p>
+          <p class="text-sm text-text-muted">La solicitud fue enviada y esta vista se actualizará cuando el backend responda.</p>
+        </div>
       </div>
 
       <!-- Action Area -->

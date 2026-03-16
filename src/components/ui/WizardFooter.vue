@@ -19,6 +19,10 @@ defineProps({
   icon: {
     type: String,
     default: 'chevron_right'
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -49,15 +53,20 @@ defineEmits(['next', 'back'])
       type="button"
       class="font-bold uppercase tracking-widest text-xs px-12 py-5 transition-all flex items-center gap-4 group"
       :class="{
-        'bg-primary text-white shadow-lg hover:shadow-[0_10px_30px_rgba(0,86,163,0.3)] hover:bg-primary/95 cursor-pointer': canContinue && color === 'primary',
-        'bg-secondary text-white shadow-xl shadow-secondary/30 hover:brightness-110 tracking-[0.05em] text-sm rounded-md cursor-pointer': canContinue && color === 'secondary',
-        'bg-gray-200 text-text-muted opacity-60 cursor-not-allowed pointer-events-none shadow-none': !canContinue
+        'bg-primary text-white shadow-lg hover:shadow-[0_10px_30px_rgba(0,86,163,0.3)] hover:bg-primary/95 cursor-pointer': canContinue && color === 'primary' && !isLoading,
+        'bg-secondary text-white shadow-xl shadow-secondary/30 hover:brightness-110 tracking-[0.05em] text-sm rounded-md cursor-pointer': canContinue && color === 'secondary' && !isLoading,
+        'bg-gray-200 text-text-muted opacity-60 cursor-not-allowed pointer-events-none shadow-none': !canContinue || isLoading,
+        'bg-secondary text-white opacity-90 cursor-wait shadow-none': isLoading && color === 'secondary',
+        'bg-primary text-white opacity-90 cursor-wait shadow-none': isLoading && color === 'primary'
       }"
-      :disabled="!canContinue"
+      :disabled="!canContinue || isLoading"
     >
-      {{ continueText }}
+      {{ isLoading ? 'Procesando...' : continueText }}
       <span class="material-symbols-outlined transition-transform"
-            :class="color === 'secondary' ? 'text-sm' : 'text-[18px] group-hover:translate-x-1'">{{ icon }}</span>
+            :class="[
+              color === 'secondary' ? 'text-sm' : 'text-[18px] group-hover:translate-x-1',
+              isLoading ? 'animate-spin' : ''
+            ]">{{ isLoading ? 'progress_activity' : icon }}</span>
     </button>
     
   </div>

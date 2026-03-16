@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
+import { generateProposals } from '@/services/api'
 import WizardFooter from '@/components/ui/WizardFooter.vue'
 
 const router = useRouter()
 const store = useWizardStore()
+const isSubmitting = ref(false)
 
 // Local state for the form bound to Pinia defaults
 const form = ref({
@@ -48,11 +50,27 @@ const goBack = () => {
   router.push('/paso-2')
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   if (!canContinue.value) return
+
   store.setStep3(form.value)
-  // Transition to step 4 (Results generation)
-  router.push('/paso-4')
+  store.startProposalGeneration()
+  isSubmitting.value = true
+
+  await router.push('/paso-4')
+
+  try {
+    const response = await generateProposals(store.$state)
+    store.setGeneratedProposals({
+      proposals: response.proposals,
+      sessionId: response.session_id
+    })
+  } catch (error) {
+    console.error('Failed to generate proposals:', error)
+    store.setProposalError(error.message)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -227,6 +245,7 @@ const submitForm = () => {
     <!-- Action Footer -->
     <WizardFooter 
       :can-continue="canContinue" 
+      :is-loading="isSubmitting"
       continue-text="Generar Propuestas"
       color="secondary"
       icon="magic_button"

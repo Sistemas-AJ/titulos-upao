@@ -1,3 +1,12 @@
+import axios from 'axios'
+
+const apiClient = axios.create({
+  baseURL: 'http://localhost:8000',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
 export const generateProposals = async (wizardState) => {
   const payload = {
     linea_investigacion: wizardState.step1.domain,
@@ -15,19 +24,11 @@ export const generateProposals = async (wizardState) => {
     problematica: wizardState.step3.problem
   }
 
-  const response = await fetch('http://localhost:8000/api/title-sessions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-
-  if (!response.ok) {
-    const errorPayload = await response.json().catch(() => ({}))
-    throw new Error(errorPayload.detail || 'No se pudieron generar las propuestas')
+  try {
+    const { data } = await apiClient.post('/api/title-sessions', payload)
+    return data
+  } catch (error) {
+    const message = error.response?.data?.detail || 'No se pudieron generar las propuestas'
+    throw new Error(message)
   }
-
-  const data = await response.json()
-  return data.proposals
 }
