@@ -22,7 +22,7 @@ Responde solo JSON valido con esta estructura exacta:
     }
   ]
 }
-Genera exactamente 5 propuestas.
+Genera exactamente 10 propuestas.
 No agregues markdown ni explicaciones.
 """.strip()
 
@@ -69,6 +69,14 @@ def generate_title_proposals(
     settings = get_settings()
     client = OpenAI(api_key=settings.api_open_ia)
     model_name = settings.model_ia.replace(" ", "-")
+    reference_count = len(reference_titles or [])
+
+    print(
+        "[AI] generate_title_proposals",
+        f"linea={payload.linea_investigacion}",
+        f"sub_linea={payload.sub_linea}",
+        f"reference_titles={reference_count}",
+    )
 
     response = client.responses.create(
 

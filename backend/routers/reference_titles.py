@@ -7,11 +7,17 @@ from backend.schemas.reference_title import (
     ReferenceTitleCreate,
     ReferenceTitleImportResponse,
     ReferenceTitleRead,
+    ResearchLineCatalogItem,
+    ResearchSublineCatalogItem,
 )
 from backend.services.reference_title_importer import parse_reference_titles_excel
 
 
 router = APIRouter(prefix="/api/reference-titles", tags=["reference-titles"])
+
+
+def prettify_catalog_label(value: str) -> str:
+    return value.replace("_", " ").replace("-", " ").strip().title()
 
 
 def to_reference_title_read(item: ReferenceTitle) -> ReferenceTitleRead:
@@ -99,3 +105,42 @@ def list_reference_titles(
 
     items = session.exec(statement.order_by(ReferenceTitle.created_at.desc()).limit(limit)).all()
     return [to_reference_title_read(item) for item in items]
+
+
+@router.get("/catalog", response_model=list[ResearchLineCatalogItem])
+def get_reference_catalog(session: Session = Depends(get_session)):
+    items = session.exec(
+        select(ReferenceTitle).order_by(
+            ReferenceTitle.linea_investigacion.asc(),
+            ReferenceTitle.sub_linea.asc(),
+        )
+    ).all()
+
+    catalog: dict[str, dict] = {}
+    for item in items:
+        line_key = item.linea_investigacion
+        subline_key = item.sub_linea
+
+        if line_key not in catalog:
+            catalog[line_key] = {
+                "value": line_key,
+                "title": prettify_catalog_label(line_key),
+                "description": None,
+                "sublines": {},
+            }
+
+        if subline_key not in catalog[line_key]["sublines"]:
+            catalog[line_key]["sublines"][subline_key] = ResearchSublineCatalogItem(
+                value=subline_key,
+                title=prettify_catalog_label(subline_key),
+            )
+
+    return [
+        ResearchLineCatalogItem(
+            value=line_data["value"],
+            title=line_data["title"],
+            description=line_data["description"],
+            sublines=list(line_data["sublines"].values()),
+        )
+        for line_data in catalog.values()
+    ]

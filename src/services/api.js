@@ -43,3 +43,12 @@ export const generateProposals = async (wizardState) => {
     throw fallbackError
   }
 }
+
+export const getResearchCatalog = async () => {
+  try {
+    const { data } = await apiClient.get('/api/reference-titles/catalog')
+    return data
+  } catch {
+    return []
+  }
+}

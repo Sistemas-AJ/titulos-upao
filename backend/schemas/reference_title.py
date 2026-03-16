@@ -22,3 +22,15 @@ class ReferenceTitleImportResponse(SQLModel):
     created: list[ReferenceTitleRead]
     duplicates: list[ReferenceTitleRead]
     total_received: int
+
+
+class ResearchSublineCatalogItem(SQLModel):
+    value: str
+    title: str
+
+
+class ResearchLineCatalogItem(SQLModel):
+    value: str
+    title: str
+    description: str | None = None
+    sublines: list[ResearchSublineCatalogItem]

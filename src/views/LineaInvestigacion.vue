@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
+import { getResearchCatalog } from '@/services/api'
 import DomainCard from '@/components/ui/DomainCard.vue'
 import SublineCard from '@/components/ui/SublineCard.vue'
 import WizardFooter from '@/components/ui/WizardFooter.vue'
@@ -11,6 +12,48 @@ const store = useWizardStore()
 
 const selectedDomain = ref('')
 const selectedSubline = ref('')
+const dynamicDomains = ref([])
+
+const domainFallbackMap = {
+  tributacion: {
+    title: 'Tributación',
+    description: 'Análisis crítico de la política fiscal y su impacto empresarial. Enfocada en el cumplimiento normativo, estrategias de planeamiento legal y la defensa del contribuyente ante la administración.',
+    icon: 'account_balance'
+  },
+  finanzas: {
+    title: 'Finanzas',
+    description: 'Investigación sobre la gestión de recursos de capital, valoración de empresas y mercados financieros. Fundamental para el desarrollo de modelos de inversión y sostenibilidad corporativa.',
+    icon: 'analytics'
+  },
+  auditoria: {
+    title: 'Auditoría',
+    description: 'Examen sistemático de la información y procesos para garantizar la transparencia. Abarca el control interno preventivo y la detección de riesgos en diversos entornos organizacionales.',
+    icon: 'fact_check'
+  },
+  contabilidad: {
+    title: 'Contabilidad',
+    description: 'Estudio de la doctrina contable y las NIIF. Se centra en la arquitectura de la información financiera y su utilidad para la toma de decisiones económicas en un entorno globalizado.',
+    icon: 'menu_book'
+  },
+  costos: {
+    title: 'Costos',
+    description: 'Optimización de la cadena de valor y gestión estratégica de recursos. Esencial para la determinación de precios, rentabilidad de procesos y control de eficiencia operativa.',
+    icon: 'calculate'
+  }
+}
+
+const sublineFallbackMap = {
+  forense: { title: 'Auditoría Forense', icon: 'policy' },
+  cumplimiento: { title: 'Cumplimiento Normativo', icon: 'gavel' },
+  operativa: { title: 'Auditoría Operativa', icon: 'settings_suggest' },
+  gestion: { title: 'Auditoría de Gestión', icon: 'admin_panel_settings' },
+  gubernamental: { title: 'Auditoría Gubernamental', icon: 'account_balance_wallet' },
+  interna: { title: 'Control Interno', icon: 'verified' },
+  sistemas: { title: 'Auditoría de Sistemas', icon: 'database' },
+  tributaria: { title: 'Auditoría Tributaria', icon: 'receipt_long' },
+  ambiental: { title: 'Auditoría Ambiental', icon: 'eco' },
+  etica: { title: 'Ética y Responsabilidad', icon: 'balance' }
+}
 
 onMounted(() => {
   // Restore state if returning from step 2
@@ -18,55 +61,56 @@ onMounted(() => {
     selectedDomain.value = store.step1.domain
     selectedSubline.value = store.step1.subline
   }
+  loadResearchCatalog()
 })
 
-// Domain configuration based on HTML
-const domains = [
-  {
-    value: 'tributacion',
-    title: 'Tributación',
-    description: 'Análisis crítico de la política fiscal y su impacto empresarial. Enfocada en el cumplimiento normativo, estrategias de planeamiento legal y la defensa del contribuyente ante la administración.',
-    icon: 'account_balance'
-  },
-  {
-    value: 'finanzas',
-    title: 'Finanzas',
-    description: 'Investigación sobre la gestión de recursos de capital, valoración de empresas y mercados financieros. Fundamental para el desarrollo de modelos de inversión y sostenibilidad corporativa.',
-    icon: 'analytics'
-  },
-  {
-    value: 'auditoria',
-    title: 'Auditoría',
-    description: 'Examen sistemático de la información y procesos para garantizar la transparencia. Abarca el control interno preventivo y la detección de riesgos en diversos entornos organizacionales.',
-    icon: 'fact_check'
-  },
-  {
-    value: 'contabilidad',
-    title: 'Contabilidad',
-    description: 'Estudio de la doctrina contable y las NIIF. Se centra en la arquitectura de la información financiera y su utilidad para la toma de decisiones económicas en un entorno globalizado.',
-    icon: 'menu_book'
-  },
-  {
-    value: 'costos',
-    title: 'Costos',
-    description: 'Optimización de la cadena de valor y gestión estratégica de recursos. Esencial para la determinación de precios, rentabilidad de procesos y control de eficiencia operativa.',
-    icon: 'calculate'
-  }
-]
+const buildFallbackCatalog = () => (
+  Object.entries(domainFallbackMap).map(([value, meta]) => ({
+    value,
+    title: meta.title,
+    description: meta.description,
+    icon: meta.icon,
+    sublines: Object.entries(sublineFallbackMap).map(([subValue, subMeta]) => ({
+      value: subValue,
+      title: subMeta.title,
+      icon: subMeta.icon
+    }))
+  }))
+)
 
-// Sublines configuration
-const sublines = [
-  { value: 'forense', title: 'Auditoría Forense', icon: 'policy' },
-  { value: 'cumplimiento', title: 'Cumplimiento Normativo', icon: 'gavel' },
-  { value: 'operativa', title: 'Auditoría Operativa', icon: 'settings_suggest' },
-  { value: 'gestion', title: 'Auditoría de Gestión', icon: 'admin_panel_settings' },
-  { value: 'gubernamental', title: 'Auditoría Gubernamental', icon: 'account_balance_wallet' },
-  { value: 'interna', title: 'Control Interno', icon: 'verified' },
-  { value: 'sistemas', title: 'Auditoría de Sistemas', icon: 'database' },
-  { value: 'tributaria', title: 'Auditoría Tributaria', icon: 'receipt_long' },
-  { value: 'ambiental', title: 'Auditoría Ambiental', icon: 'eco' },
-  { value: 'etica', title: 'Ética y Responsabilidad', icon: 'balance' }
-]
+const enrichCatalog = (catalog) => {
+  if (!catalog.length) return buildFallbackCatalog()
+
+  return catalog.map((domain) => {
+    const fallbackDomain = domainFallbackMap[domain.value] || {}
+    return {
+      value: domain.value,
+      title: domain.title || fallbackDomain.title || domain.value,
+      description: domain.description || fallbackDomain.description || 'Línea de investigación disponible en el catálogo institucional.',
+      icon: fallbackDomain.icon || 'menu_book',
+      sublines: (domain.sublines || []).map((subline) => {
+        const fallbackSubline = sublineFallbackMap[subline.value] || {}
+        return {
+          value: subline.value,
+          title: subline.title || fallbackSubline.title || subline.value,
+          icon: fallbackSubline.icon || 'sell'
+        }
+      })
+    }
+  })
+}
+
+const loadResearchCatalog = async () => {
+  const catalog = await getResearchCatalog()
+  dynamicDomains.value = enrichCatalog(catalog)
+}
+
+const domains = computed(() => dynamicDomains.value.length ? dynamicDomains.value : buildFallbackCatalog())
+
+const sublines = computed(() => {
+  const selected = domains.value.find((domain) => domain.value === selectedDomain.value)
+  return selected?.sublines || []
+})
 
 const canContinue = computed(() => {
   return selectedDomain.value !== '' && selectedSubline.value !== ''
