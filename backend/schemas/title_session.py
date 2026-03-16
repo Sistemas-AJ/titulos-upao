@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import model_validator
+from pydantic import ConfigDict, Field, model_validator
 from sqlmodel import SQLModel
 
 from backend.models.title_session import GrupoEmpresa, SessionStatus, TipoEmpresa
@@ -50,6 +50,24 @@ class TitleProposalFrontend(SQLModel):
     s: str
 
 
+class AIProposalSchema(SQLModel):
+    model_config = ConfigDict(extra="forbid")
+
+    titulo: str
+    variable_1: str
+    conector: str
+    variable_2: str
+    unidad_investigacion: str
+    espacio: str
+    tiempo: str
+
+
+class AIProposalPayload(SQLModel):
+    model_config = ConfigDict(extra="forbid")
+
+    proposals: list[AIProposalSchema] = Field(min_length=5, max_length=5)
+
+
 class TitleSessionRead(SQLModel):
     id: UUID
     user_id: UUID | None
@@ -78,3 +96,8 @@ class TitleGenerationResponse(SQLModel):
     input_data: TitleSessionRead
     proposals: list[TitleProposalFrontend]
 
+
+class RetryableErrorDetail(SQLModel):
+    message: str
+    retryable: bool = True
+    reason: str

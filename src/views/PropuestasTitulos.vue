@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
+import { generateProposals } from '@/services/api'
 
 const router = useRouter()
 const store = useWizardStore()
@@ -11,6 +12,7 @@ const isLoading = computed(() => store.step4.status === 'loading')
 const proposals = computed(() => store.step4.proposals)
 const hasError = computed(() => store.step4.status === 'error')
 const errorMessage = computed(() => store.step4.error)
+const canRetry = computed(() => store.step4.retryable)
 
 onMounted(() => {
   if (!store.isStep3Complete) {
@@ -41,6 +43,24 @@ const exportFormat = () => {
 
 const goBack = () => {
   router.push('/paso-3')
+}
+
+const retryGeneration = async () => {
+  store.startProposalGeneration()
+
+  try {
+    const response = await generateProposals(store.$state)
+    store.setGeneratedProposals({
+      proposals: response.proposals,
+      sessionId: response.session_id
+    })
+  } catch (error) {
+    console.error('Retry failed:', error)
+    store.setProposalError({
+      message: error.message,
+      retryable: Boolean(error.retryable)
+    })
+  }
 }
 </script>
 
@@ -107,6 +127,15 @@ const goBack = () => {
         <div>
           <p class="text-sm text-red-800 font-bold">No se pudieron generar las propuestas.</p>
           <p class="text-sm text-red-700 mt-1">{{ errorMessage }}</p>
+          <button
+            v-if="canRetry"
+            @click="retryGeneration"
+            type="button"
+            class="mt-4 inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-red-700 transition-colors"
+          >
+            <span class="material-symbols-outlined text-sm">refresh</span>
+            Reintentar
+          </button>
         </div>
       </div>
 

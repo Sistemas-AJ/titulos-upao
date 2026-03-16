@@ -9,6 +9,7 @@ from backend.database.session import get_session
 from backend.models.title_session import SessionStatus, TitleProposal, TitleSession
 from backend.models.user import User
 from backend.schemas.title_session import (
+    RetryableErrorDetail,
     TitleGenerationRequest,
     TitleGenerationResponse,
     TitleProposalFrontend,
@@ -78,45 +79,42 @@ def create_title_session(
     if payload.user_id and not session.get(User, payload.user_id):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    try:
+        ai_result = generate_title_proposals(payload)
+        proposals_payload = ai_result["response"]["proposals"]
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=RetryableErrorDetail(
+                message="La IA no devolvio un formato valido. Intenta nuevamente.",
+                reason="invalid_ai_response",
+            ).model_dump(),
+        ) from exc
+
     settings = get_settings()
     db_session = TitleSession(
         **payload.model_dump(),
         expires_at=datetime.now(timezone.utc) + timedelta(hours=settings.session_ttl_hours),
     )
     session.add(db_session)
-    session.commit()
-    session.refresh(db_session)
+    session.flush()
 
-    try:
-        ai_result = generate_title_proposals(payload)
-        proposals_payload = ai_result["response"].get("proposals", [])
-
-        for proposal in proposals_payload:
-            session.add(
-                TitleProposal(
-                    session_id=db_session.id,
-                    titulo=proposal["titulo"],
-                    variable_1=proposal["variable_1"],
-                    conector=proposal["conector"],
-                    variable_2=proposal["variable_2"],
-                    unidad_investigacion=proposal["unidad_investigacion"],
-                    espacio=proposal["espacio"],
-                    tiempo=proposal["tiempo"],
-                )
+    for proposal in proposals_payload:
+        session.add(
+            TitleProposal(
+                session_id=db_session.id,
+                titulo=proposal["titulo"],
+                variable_1=proposal["variable_1"],
+                conector=proposal["conector"],
+                variable_2=proposal["variable_2"],
+                unidad_investigacion=proposal["unidad_investigacion"],
+                espacio=proposal["espacio"],
+                tiempo=proposal["tiempo"],
             )
+        )
 
-        db_session.ai_raw_response = ai_result
-        db_session.status = SessionStatus.completed
-    except Exception as exc:
-        db_session.status = SessionStatus.failed
-        db_session.ai_raw_response = {"error": str(exc)}
-        session.add(db_session)
-        session.commit()
-        raise HTTPException(
-            status_code=502,
-            detail="No se pudo generar la respuesta de IA",
-        ) from exc
-
+    db_session.ai_raw_response = ai_result
+    db_session.status = SessionStatus.completed
     db_session.updated_at = datetime.now(timezone.utc)
     session.add(db_session)
     session.commit()
@@ -161,4 +159,3 @@ def delete_expired_sessions(session: Session = Depends(get_session)):
         session.exec(delete(TitleProposal).where(TitleProposal.session_id == expired_session.id))
         session.delete(expired_session)
     session.commit()
-

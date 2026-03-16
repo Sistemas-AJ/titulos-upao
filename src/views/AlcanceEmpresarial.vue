@@ -67,7 +67,10 @@ const submitForm = async () => {
     })
   } catch (error) {
     console.error('Failed to generate proposals:', error)
-    store.setProposalError(error.message)
+    store.setProposalError({
+      message: error.message,
+      retryable: Boolean(error.retryable)
+    })
   } finally {
     isSubmitting.value = false
   }

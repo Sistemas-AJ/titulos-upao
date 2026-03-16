@@ -26,7 +26,8 @@ const defaultState = () => ({
     proposals: [],
     sessionId: '',
     status: 'idle',
-    error: ''
+    error: '',
+    retryable: false
   }
 })
 
@@ -96,6 +97,7 @@ export const useWizardStore = defineStore('wizard', {
       this.step4.selectedTitles = []
       this.step4.sessionId = ''
       this.step4.error = ''
+      this.step4.retryable = false
       this.step4.status = 'loading'
       this._persist()
     },
@@ -103,13 +105,15 @@ export const useWizardStore = defineStore('wizard', {
       this.step4.proposals = proposals
       this.step4.sessionId = sessionId
       this.step4.error = ''
+      this.step4.retryable = false
       this.step4.status = 'success'
       this._persist()
     },
-    setProposalError(message) {
+    setProposalError({ message, retryable = false }) {
       this.step4.proposals = []
       this.step4.selectedTitles = []
       this.step4.error = message
+      this.step4.retryable = retryable
       this.step4.status = 'error'
       this._persist()
     },

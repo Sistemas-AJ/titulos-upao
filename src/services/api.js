@@ -28,7 +28,18 @@ export const generateProposals = async (wizardState) => {
     const { data } = await apiClient.post('/api/title-sessions', payload)
     return data
   } catch (error) {
-    const message = error.response?.data?.detail || 'No se pudieron generar las propuestas'
-    throw new Error(message)
+    const detail = error.response?.data?.detail
+
+    if (detail && typeof detail === 'object') {
+      const retryError = new Error(detail.message || 'No se pudieron generar las propuestas')
+      retryError.retryable = Boolean(detail.retryable)
+      retryError.reason = detail.reason || 'unknown'
+      throw retryError
+    }
+
+    const fallbackError = new Error(detail || 'No se pudieron generar las propuestas')
+    fallbackError.retryable = false
+    fallbackError.reason = 'unknown'
+    throw fallbackError
   }
 }

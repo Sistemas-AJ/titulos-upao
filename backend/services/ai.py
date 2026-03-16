@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 
 from backend.config import get_settings
-from backend.schemas.title_session import TitleGenerationRequest
+from backend.schemas.title_session import AIProposalPayload, TitleGenerationRequest
 
 
 SYSTEM_PROMPT = """
@@ -22,7 +22,7 @@ Responde solo JSON valido con esta estructura exacta:
     }
   ]
 }
-Genera exactamente 5 propuestas.
+Genera exactamente 10 propuestas.
 No agregues markdown ni explicaciones.
 """.strip()
 
@@ -56,7 +56,9 @@ def generate_title_proposals(payload: TitleGenerationRequest) -> dict:
     model_name = settings.model_ia.replace(" ", "-")
 
     response = client.responses.create(
+
         model=model_name,
+        timeout=60,
         input=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": build_user_prompt(payload)},
@@ -65,9 +67,11 @@ def generate_title_proposals(payload: TitleGenerationRequest) -> dict:
 
     raw_output = response.output_text
     parsed_output = json.loads(raw_output)
+    validated_output = AIProposalPayload.model_validate(parsed_output)
     return {
         "request": payload.model_dump(mode="json"),
-        "response": parsed_output,
+        "response": validated_output.model_dump(mode="json"),
         "response_id": response.id,
         "model": model_name,
+        "raw_output": raw_output,
     }
