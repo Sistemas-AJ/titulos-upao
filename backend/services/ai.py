@@ -22,12 +22,23 @@ Responde solo JSON valido con esta estructura exacta:
     }
   ]
 }
-Genera exactamente 10 propuestas.
+Genera exactamente 5 propuestas.
 No agregues markdown ni explicaciones.
 """.strip()
 
 
-def build_user_prompt(payload: TitleGenerationRequest) -> str:
+def build_user_prompt(payload: TitleGenerationRequest, reference_titles: list[str] | None = None) -> str:
+    example_block = ""
+    if reference_titles:
+        formatted_examples = "\n".join(f"- {title}" for title in reference_titles)
+        example_block = f"""
+
+Titulos de referencia registrados para esta linea y sublinea:
+{formatted_examples}
+
+Usalos solo como referencia de estilo, estructura y enfoque. No los copies literalmente.
+""".rstrip()
+
     return f"""
 Genera titulos de investigacion contable con estos datos:
 - linea_investigacion: {payload.linea_investigacion}
@@ -47,10 +58,14 @@ Condiciones:
 - Mantener coherencia metodologica con el nivel de investigacion.
 - El campo tiempo debe ser un anio o periodo concreto.
 - El campo espacio debe ser una ubicacion o ambito delimitado.
+{example_block}
 """.strip()
 
 
-def generate_title_proposals(payload: TitleGenerationRequest) -> dict:
+def generate_title_proposals(
+    payload: TitleGenerationRequest,
+    reference_titles: list[str] | None = None,
+) -> dict:
     settings = get_settings()
     client = OpenAI(api_key=settings.api_open_ia)
     model_name = settings.model_ia.replace(" ", "-")
@@ -61,7 +76,7 @@ def generate_title_proposals(payload: TitleGenerationRequest) -> dict:
         timeout=60,
         input=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(payload)},
+            {"role": "user", "content": build_user_prompt(payload, reference_titles)},
         ],
     )
 
@@ -74,4 +89,5 @@ def generate_title_proposals(payload: TitleGenerationRequest) -> dict:
         "response_id": response.id,
         "model": model_name,
         "raw_output": raw_output,
+        "reference_titles": reference_titles or [],
     }

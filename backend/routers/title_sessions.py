@@ -17,6 +17,7 @@ from backend.schemas.title_session import (
     TitleSessionRead,
 )
 from backend.services.ai import generate_title_proposals
+from backend.services.reference_titles import get_reference_examples
 
 
 router = APIRouter(prefix="/api/title-sessions", tags=["title-sessions"])
@@ -79,8 +80,14 @@ def create_title_session(
     if payload.user_id and not session.get(User, payload.user_id):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    reference_titles = get_reference_examples(
+        session,
+        linea_investigacion=payload.linea_investigacion,
+        sub_linea=payload.sub_linea,
+    )
+
     try:
-        ai_result = generate_title_proposals(payload)
+        ai_result = generate_title_proposals(payload, reference_titles=reference_titles)
         proposals_payload = ai_result["response"]["proposals"]
     except Exception as exc:
         raise HTTPException(
