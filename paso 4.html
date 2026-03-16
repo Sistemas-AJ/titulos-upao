@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard UPAO - Paso 4: Propuestas de Títulos</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Outfit:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056A3",
+                        "secondary": "#EE8600",
+                        "background-light": "#F8FAFC",
+                        "surface": "#FFFFFF",
+                        "text-main": "#1E293B",
+                        "muted": "#64748B",
+                        "border-color": "#E2E8F0",
+                        "accent-blue": "#6CC1EB",
+                    },
+                    fontFamily: {
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "8px",
+                        "sm": "4px",
+                        "md": "8px",
+                        "lg": "12px",
+                        "xl": "16px",
+                        "2xl": "24px",
+                        "3xl": "32px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: theme('colors.text-main');
+        }
+        h1, h2, h3, h4, h5, h6, .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+        .title-card {
+            transition: all 0.2s ease;
+            border: 1px solid theme('colors.border-color');
+        }
+        .title-card:hover {
+            border-color: theme('colors.primary');
+            box-shadow: 0 10px 15px -3px rgba(0, 86, 163, 0.1);
+        }
+        .title-card input[type="checkbox"]:checked + div .card-content {
+            background-color: #F0F7FF;
+        }
+        .analysis-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body class="bg-background-light min-h-screen flex overflow-x-hidden antialiased">
+<!-- Sidebar -->
+<aside class="w-[280px] bg-primary border-r border-white/5 flex-shrink-0 flex flex-col fixed h-full z-10 shadow-2xl">
+<div class="p-8 border-b border-white/10">
+<h1 class="text-white text-xl font-display font-bold leading-tight">Dashboard UPAO</h1>
+<p class="text-white/60 text-sm font-normal mt-1 tracking-wide">Generador de Títulos</p>
+</div>
+<nav class="flex-1 py-8 px-6 flex flex-col gap-6 relative">
+<div class="absolute left-[39px] top-12 bottom-12 w-[1px] bg-white/10 z-0"></div>
+<!-- Step 1 (Done) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white/10 border border-white/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-sm text-white">check</span>
+</div>
+<div>
+<p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 1</p>
+<p class="text-white/90 font-medium text-sm">Línea de Investigación</p>
+</div>
+</div>
+<!-- Step 2 (Done) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white/10 border border-white/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-sm text-white">check</span>
+</div>
+<div>
+<p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 2</p>
+<p class="text-white/90 font-medium text-sm">Nivel de Investigación</p>
+</div>
+</div>
+<!-- Step 3 (Done) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white/10 border border-white/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-sm text-white">check</span>
+</div>
+<div>
+<p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 3</p>
+<p class="text-white/90 font-medium text-sm">Unidad de Investigación</p>
+</div>
+</div>
+<!-- Step 4 (Active) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg shadow-black/40">
+<span class="text-primary text-sm font-bold">4</span>
+</div>
+<div>
+<p class="text-white/70 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 4</p>
+<p class="text-white font-bold text-sm">Propuestas de Títulos</p>
+</div>
+</div>
+</nav>
+<div class="p-6 border-t border-white/5 text-xs text-white/50">
+<p>UPAO © 2024</p>
+<p>Facultad de Ciencias Económicas</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-[280px] bg-white min-h-screen">
+<div class="max-w-[1100px] mx-auto py-16 px-12">
+<!-- Header -->
+<header class="mb-10 flex justify-between items-end">
+<div>
+<h2 class="font-display text-4xl font-bold text-primary leading-tight mb-3">Propuestas de Títulos</h2>
+<p class="text-lg text-muted">Seleccione las opciones que mejor se adapten a su objetivo de estudio.</p>
+<div class="h-1 w-20 bg-secondary mt-6 rounded-full"></div>
+</div>
+<div class="flex gap-3">
+<button class="bg-white border-2 border-primary text-primary px-6 py-3 rounded-md font-bold uppercase tracking-wider text-xs hover:bg-primary hover:text-white transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Descargar Selección
+                    </button>
+<button class="bg-secondary text-white px-6 py-3 rounded-md font-bold uppercase tracking-wider text-xs hover:brightness-110 transition-all shadow-lg shadow-secondary/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">description</span>
+                        Exportar Formato Oficial
+                    </button>
+</div>
+</header>
+<!-- AI Limitation Warning -->
+<div class="mb-10 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-600">info</span>
+<p class="text-sm text-amber-800 font-medium">
+<span class="font-bold">Nota:</span> Los resultados de la IA son sugerencias y deben ser revisados académicamente.
+                </p>
+</div>
+<!-- Proposals List (20 items) -->
+<div class="space-y-4">
+<script>
+                    const proposals = [
+                        { t: "La gestión financiera y su incidencia en la rentabilidad de las empresas del sector retail en Trujillo, periodo 2023", v1: "Gestión financiera", c: "Incidencia en", v2: "Rentabilidad", u: "Empresas del sector retail", s: "Trujillo, 2023" },
+                        { t: "Implementación de un sistema de control interno y la optimización de recursos en la Constructora del Norte S.A.C., 2024", v1: "Sistema de control interno", c: "Optimización de", v2: "Recursos", u: "Constructora del Norte S.A.C.", s: "2024" },
+                        { t: "Impacto de la facturación electrónica en la eficiencia operativa de las PYMES comerciales de Piura, 2023", v1: "Facturación electrónica", c: "Impacto en", v2: "Eficiencia operativa", u: "PYMES comerciales", s: "Piura, 2023" },
+                        { t: "Estrategias de planeamiento tributario para la reducción de contingencias fiscales en empresas manufactureras, 2023", v1: "Planeamiento tributario", c: "Reducción de", v2: "Contingencias fiscales", u: "Empresas manufactureras", s: "2023" },
+                        { t: "El flujo de caja y la toma de decisiones financieras en las estaciones de servicio de la región La Libertad, 2024", v1: "Flujo de caja", c: "Toma de decisiones", v2: "Financieras", u: "Estaciones de servicio", s: "La Libertad, 2024" },
+                        { t: "Análisis de la cultura tributaria y su relación con el cumplimiento de obligaciones en los comerciantes de Trujillo, 2023", v1: "Cultura tributaria", c: "Relación con", v2: "Cumplimiento de obligaciones", u: "Comerciantes", s: "Trujillo, 2023" },
+                        { t: "Gestión de inventarios y su influencia en el capital de trabajo de las ferreterías de la ciudad de Piura, periodo 2022-2023", v1: "Gestión de inventarios", c: "Influencia en", v2: "Capital de trabajo", u: "Ferreterías", s: "Piura, 2022-2023" },
+                        { t: "Auditoría de cumplimiento y la gestión administrativa en las municipalidades distritales de la provincia de Trujillo, 2024", v1: "Auditoría de cumplimiento", c: "Gestión", v2: "Administrativa", u: "Municipalidades distritales", s: "Provincia de Trujillo, 2024" },
+                        { t: "Transformación digital contable y la productividad del personal en los estudios contables de la zona centro de Piura, 2023", v1: "Transformación digital contable", c: "Productividad", v2: "Del personal", u: "Estudios contables", s: "Zona centro de Piura, 2023" },
+                        { t: "Costos de producción y la fijación de precios en las empresas agroindustriales exportadoras de Chavimochic, 2023", v1: "Costos de producción", c: "Fijación de", v2: "Precios", u: "Empresas agroindustriales", s: "Chavimochic, 2023" },
+                        { t: "La ética profesional del contador y la transparencia de la información financiera en el sector público, 2024", v1: "Ética profesional", c: "Transparencia de", v2: "Información financiera", u: "Sector público", s: "2024" },
+                        { t: "Evaluación del sistema de detracciones y su efecto en la liquidez de las empresas de servicios de transporte, 2023", v1: "Sistema de detracciones", c: "Efecto en", v2: "Liquidez", u: "Empresas de transporte", s: "2023" },
+                        { t: "Financiamiento bancario y el crecimiento económico de las microempresas del sector calzado en El Porvenir, 2023", v1: "Financiamiento bancario", c: "Crecimiento", v2: "Económico", u: "Microempresas de calzado", s: "El Porvenir, 2023" },
+                        { t: "Normas Internacionales de Información Financiera (NIIF) y su impacto en la presentación de estados financieros, 2023", v1: "NIIF", c: "Impacto en", v2: "Estados financieros", u: "Empresas corporativas", s: "2023" },
+                        { t: "Control presupuestario y la ejecución de gastos en las instituciones educativas privadas de la provincia de Piura, 2024", v1: "Control presupuestario", c: "Ejecución de", v2: "Gastos", u: "Instituciones educativas", s: "Provincia de Piura, 2024" },
+                        { t: "Incidencia de la gestión por procesos en la rentabilidad operativa de las empresas logísticas del Puerto de Paita, 2023", v1: "Gestión por procesos", c: "Incidencia en", v2: "Rentabilidad operativa", u: "Empresas logísticas", s: "Puerto de Paita, 2023" },
+                        { t: "Análisis del apalancamiento financiero y la sostenibilidad de las empresas textiles en Trujillo Metropolitano, 2024", v1: "Apalancamiento financiero", c: "Sostenibilidad", v2: "Empresarial", u: "Empresas textiles", s: "Trujillo, 2024" },
+                        { t: "Gestión de cuentas por cobrar y su repercusión en la solvencia de las clínicas privadas de la ciudad de Piura, 2023", v1: "Cuentas por cobrar", c: "Repercusión en", v2: "Solvencia", u: "Clínicas privadas", s: "Piura, 2023" },
+                        { t: "Modernización de la gestión pública y la eficiencia del gasto en el Gobierno Regional de La Libertad, periodo 2023", v1: "Modernización gestión pública", c: "Eficiencia del", v2: "Gasto", u: "Gobierno Regional", s: "La Libertad, 2023" },
+                        { t: "El outsourcing contable y la reducción de costos operativos en las medianas empresas de servicios en Piura, 2024", v1: "Outsourcing contable", c: "Reducción de", v2: "Costos operativos", u: "Medianas empresas", s: "Piura, 2024" }
+                    ];
+
+                    proposals.forEach((item, index) => {
+                        document.write(`
+                            <label class="title-card block bg-white rounded-lg cursor-pointer overflow-hidden group">
+                                <input type="checkbox" class="hidden peer" name="proposal-selection" value="${index}">
+                                <div class="flex items-stretch peer-checked:bg-blue-50/50 transition-colors">
+                                    <div class="w-16 flex items-center justify-center border-r border-slate-100 peer-checked:bg-primary peer-checked:text-white transition-colors">
+                                        <span class="material-symbols-outlined selection-icon">
+                                            add_circle
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 p-6 card-content">
+                                        <h3 class="font-display font-bold text-lg text-primary mb-4 leading-snug">${item.t}</h3>
+                                        
+                                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                            <div>
+                                                <span class="analysis-tag bg-blue-100 text-blue-700">Variable 1</span>
+                                                <p class="text-xs text-muted font-medium">${item.v1}</p>
+                                            </div>
+                                            <div>
+                                                <span class="analysis-tag bg-slate-100 text-slate-700">Conector</span>
+                                                <p class="text-xs text-muted font-medium">${item.c}</p>
+                                            </div>
+                                            <div>
+                                                <span class="analysis-tag bg-blue-100 text-blue-700">Variable 2</span>
+                                                <p class="text-xs text-muted font-medium">${item.v2}</p>
+                                            </div>
+                                            <div>
+                                                <span class="analysis-tag bg-purple-100 text-purple-700">U. de Invest.</span>
+                                                <p class="text-xs text-muted font-medium">${item.u}</p>
+                                            </div>
+                                            <div>
+                                                <span class="analysis-tag bg-emerald-100 text-emerald-700">Espacial/Temp.</span>
+                                                <p class="text-xs text-muted font-medium">${item.s}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        `);
+                    });
+                </script>
+</div>
+<!-- Action Area -->
+<div class="flex justify-between items-center pt-12 border-t border-border-color mt-12">
+<button class="group flex items-center gap-2 text-muted font-bold uppercase tracking-wider text-xs hover:text-primary transition-colors px-4 py-2" type="button">
+<span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Regresar al paso anterior
+                </button>
+<div class="flex items-center gap-4">
+<span class="text-xs font-bold text-muted uppercase tracking-widest">Paso final completado</span>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

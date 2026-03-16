@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Geologica', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Newsreader', serif;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  .sidebar-step-active {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left: 4px solid white;
+  }
+}
+
+/* Animations that are globally relevant */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}

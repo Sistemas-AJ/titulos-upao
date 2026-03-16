@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0056A3",
+              "secondary": "#EE8600",
+              "background-light": "#f8f6f6",
+              "background-dark": "#211114",
+            },
+            fontFamily: {
+              "display": ["Newsreader", "serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Newsreader', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-tab { border-bottom: 3px solid #0056A3; color: #0056A3; font-weight: 700; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- Fixed Sidebar -->
+<aside class="w-72 bg-primary text-white flex flex-col fixed h-full shadow-xl">
+<div class="p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 overflow-hidden">
+<img alt="UPAO Logo" class="object-cover w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5xXqtSL2XNcFEVS6TL-_yBE6S10jlNeuLJKLFYw5E21eNiCbxv2CGViFTSNnW2ZrQANY9REZnwprYhgOl6Iah4Qc1axKGXhzr3b0gL7ky9GsP9fGZ-6rNHXO6SKPIvFbBWeDJmiGuZ3w_7IdOFVnIdBudxi9txk8bl6_e5ou4tNJGATBj8kZBPaErnFrC6Ac6tHK-OByGac34vl4KHV0L4gQ9dcbiJcdb3jnqAtcecMWPzfD7iDvNZlniL0RpivUhIRec2OzOVOkL"/>
+</div>
+<div>
+<h1 class="text-lg font-bold leading-none tracking-tight">UPAO</h1>
+<p class="text-xs text-white/70 uppercase tracking-widest mt-1">Plataforma de Tesis</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<p class="text-[10px] font-bold text-white/50 uppercase tracking-widest px-3 mb-2">Gestión Académica</p>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-white/80" href="#">
+<span class="material-symbols-outlined">person_add</span>
+<span class="text-sm font-medium">Inscripción</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-white/80" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Planes de Tesis</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-white/80" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm font-medium">Desarrollo</span>
+</a>
+<div class="my-4 border-t border-white/10"></div>
+<p class="text-[10px] font-bold text-white/50 uppercase tracking-widest px-3 mb-2">Herramientas</p>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-white/10 text-white shadow-inner transition-all border border-white/20" href="#">
+<span class="material-symbols-outlined">database</span>
+<span class="text-sm font-bold">Base de Datos de Tesis</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-white/80" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-sm font-medium">Normativas</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6">
+<div class="bg-white/10 rounded-xl p-4 flex flex-col gap-3">
+<p class="text-xs font-medium text-white/80">Acceso Administrativo</p>
+<button class="bg-white text-primary text-xs font-bold py-2 rounded-lg hover:bg-slate-100 transition-colors">
+                        Panel de Control
+                    </button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-72 p-8">
+<!-- Header -->
+<header class="flex flex-col gap-2 mb-8">
+<div class="flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-display font-black text-primary tracking-tight">Base de Datos de Tesis UPAO</h2>
+<p class="text-slate-600 dark:text-slate-400 text-lg mt-1 italic">Módulo de consulta interna de títulos e investigaciones registradas.</p>
+</div>
+<div class="flex items-center gap-4 text-slate-500">
+<div class="flex items-center gap-1 text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded">
+<span class="material-symbols-outlined text-sm">storage</span>
+<span>Local DB v2.4</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Search & Filters -->
+<section class="flex flex-col gap-6 mb-10">
+<div class="flex gap-4">
+<div class="relative group flex-1">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/60 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all text-lg shadow-sm" placeholder="Buscar por título exacto, autor o código de registro..." type="text"/>
+</div>
+<button class="px-6 py-4 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg">
+<span class="material-symbols-outlined">filter_list</span>
+                        Filtros Avanzados
+                    </button>
+</div>
+<div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar bg-white dark:bg-slate-800 rounded-t-xl px-4">
+<button class="px-6 py-4 text-sm active-tab whitespace-nowrap">Tributación</button>
+<button class="px-6 py-4 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap transition-colors">Finanzas</button>
+<button class="px-6 py-4 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap transition-colors">Auditoría</button>
+<button class="px-6 py-4 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap transition-colors">Contabilidad</button>
+<button class="px-6 py-4 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap transition-colors">Costos</button>
+<button class="px-6 py-4 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap transition-colors">Gestión Pública</button>
+</div>
+</section>
+<!-- Internal Database Table/Grid -->
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+<div class="grid grid-cols-1 divide-y divide-slate-100 dark:divide-slate-700">
+<!-- Title Row 1 -->
+<div class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded">T-2023-0452</span>
+<span class="text-xs text-slate-400 font-medium italic">Línea: Tributación Nacional</span>
+</div>
+<h3 class="text-xl font-display font-bold text-slate-900 dark:text-white group cursor-pointer hover:text-primary transition-colors">Impacto de la recaudación del impuesto predial en la gestión financiera de la Municipalidad de Trujillo, 2022</h3>
+<div class="flex items-center gap-6 text-sm text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">person</span> Castillo Mendoza, Roberto</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">calendar_today</span> Sustentada: 12/11/2023</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base text-green-600">check_circle</span> Aprobada</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors border border-slate-200 dark:border-slate-600 rounded-lg" title="Ver Abstract">
+<span class="material-symbols-outlined">subject</span>
+</button>
+</div>
+</div>
+<!-- Title Row 2 -->
+<div class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded">T-2023-0918</span>
+<span class="text-xs text-slate-400 font-medium italic">Línea: Tributación Empresarial</span>
+</div>
+<h3 class="text-xl font-display font-bold text-slate-900 dark:text-white group cursor-pointer hover:text-primary transition-colors">Estrategias de planeamiento tributario y su relación con la rentabilidad en empresas del sector construcción</h3>
+<div class="flex items-center gap-6 text-sm text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">person</span> Díaz Palacios, Elena</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">calendar_today</span> Sustentada: 05/08/2022</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base text-green-600">check_circle</span> Aprobada</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors border border-slate-200 dark:border-slate-600 rounded-lg" title="Ver Abstract">
+<span class="material-symbols-outlined">subject</span>
+</button>
+</div>
+</div>
+<!-- Title Row 3 -->
+<div class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded">T-2024-0124</span>
+<span class="text-xs text-slate-400 font-medium italic">Línea: Derecho Tributario</span>
+</div>
+<h3 class="text-xl font-display font-bold text-slate-900 dark:text-white group cursor-pointer hover:text-primary transition-colors">Análisis de la elusión fiscal en el marco de la Norma XVI del Título Preliminar del Código Tributario</h3>
+<div class="flex items-center gap-6 text-sm text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">person</span> Ruiz Galarreta, Carlos</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">calendar_today</span> Sustentada: 15/01/2024</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base text-secondary">pending</span> En Revisión Final</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors border border-slate-200 dark:border-slate-600 rounded-lg" title="Ver Abstract">
+<span class="material-symbols-outlined">subject</span>
+</button>
+</div>
+</div>
+<!-- Title Row 4 -->
+<div class="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<span class="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded">T-2023-0876</span>
+<span class="text-xs text-slate-400 font-medium italic">Línea: Política Fiscal</span>
+</div>
+<h3 class="text-xl font-display font-bold text-slate-900 dark:text-white group cursor-pointer hover:text-primary transition-colors">Incidencia de los incentivos tributarios en la inversión de las Micro y Pequeñas Empresas de la Región La Libertad</h3>
+<div class="flex items-center gap-6 text-sm text-slate-500">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">person</span> Sánchez Flores, María</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base">calendar_today</span> Sustentada: 20/10/2023</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-base text-green-600">check_circle</span> Aprobada</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors border border-slate-200 dark:border-slate-600 rounded-lg" title="Ver Abstract">
+<span class="material-symbols-outlined">subject</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 p-4 text-center">
+<p class="text-xs text-slate-400 font-medium italic">Mostrando 4 de 1,248 registros en la categoría 'Tributación'</p>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex justify-between items-center">
+<div class="text-sm text-slate-500">Página 1 de 312</div>
+<nav class="flex items-center gap-1">
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm shadow-md">1</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition-colors text-sm">2</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition-colors text-sm">3</button>
+<span class="px-2 text-slate-400">...</span>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition-colors text-sm">312</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</nav>
+</div>
+</main>
+</div>
+</body></html>

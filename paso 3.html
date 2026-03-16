@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard UPAO - Paso 3: Unidad de Investigación</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Outfit:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056A3",
+                        "secondary": "#EE8600",
+                        "background-light": "#F8FAFC",
+                        "surface": "#FFFFFF",
+                        "text-main": "#1E293B",
+                        "muted": "#64748B",
+                        "border-color": "#E2E8F0",
+                        "accent-blue": "#6CC1EB",
+                    },
+                    fontFamily: {
+                        "display": ["Outfit", "sans-serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "8px",
+                        "sm": "4px",
+                        "md": "8px",
+                        "lg": "12px",
+                        "xl": "16px",
+                        "2xl": "24px",
+                        "3xl": "32px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: theme('colors.text-main');
+        }
+        h1, h2, h3, h4, h5, h6, .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+        .form-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            width: 240px;
+            flex-shrink: 0;
+            font-weight: 600;
+            padding-top: 0.75rem;
+            color: theme('colors.text-main');
+            font-size: 0.95rem;
+        }
+        .form-input-container {
+            flex-grow: 1;
+            max-width: 640px;
+        }
+        
+        .editorial-input {
+            width: 100%;
+            height: 48px;
+            border: 1px solid theme('colors.border-color');
+            background-color: theme('colors.surface');
+            padding: 0 1rem;
+            font-size: 15px;
+            color: theme('colors.text-main');
+            border-radius: theme('borderRadius.DEFAULT');
+            transition: all 0.2s ease;
+        }
+        .editorial-input:focus {
+            outline: none;
+            border-color: theme('colors.primary');
+            box-shadow: 0 0 0 2px rgba(0, 86, 163, 0.1);
+        }
+        textarea.editorial-input {
+            height: 100px;
+            padding-top: 0.75rem;
+            resize: vertical;
+        }
+        textarea.editorial-input-large {
+            height: 160px;
+        }
+
+        .segmented-control {
+            display: inline-flex;
+            background-color: #F1F5F9;
+            border-radius: theme('borderRadius.DEFAULT');
+            padding: 4px;
+            width: 100%;
+        }
+        .segmented-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: theme('colors.muted');
+            transition: all 0.2s;
+            height: 40px;
+        }
+        .segmented-input {
+            display: none;
+        }
+        .segmented-input:checked + .segmented-text {
+            background-color: theme('colors.surface');
+            color: theme('colors.primary');
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .segmented-text {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        /* Logic for conditional fields based on selection */
+        #company-count-row { display: none; }
+        
+        #scope-group:checked ~ #conditional-fields #company-count-row {
+            display: flex;
+        }
+
+        /* Dynamic labels using data attributes and CSS content */
+        .dynamic-label::before {
+            content: attr(data-single);
+        }
+        #scope-group:checked ~ #conditional-fields .dynamic-label::before {
+            content: attr(data-group);
+        }
+
+        /* Placeholder switching logic via CSS */
+        #scope-group:checked ~ #conditional-fields input#company-name::-webkit-input-placeholder { color: transparent; }
+        #scope-group:checked ~ #conditional-fields input#company-name::placeholder { color: transparent; }
+        #scope-group:checked ~ #conditional-fields .placeholder-group { display: block; }
+        #scope-group:checked ~ #conditional-fields .placeholder-single { display: none; }
+        
+        .placeholder-group { display: none; }
+        .placeholder-single { display: block; }
+
+    </style>
+</head>
+<body class="bg-background-light min-h-screen flex overflow-x-hidden antialiased">
+<!-- Sidebar -->
+<aside class="w-[280px] bg-primary border-r border-white/5 flex-shrink-0 flex flex-col fixed h-full z-10 shadow-2xl">
+<div class="p-8 border-b border-white/10">
+<h1 class="text-white text-xl font-display font-bold leading-tight">Dashboard UPAO</h1>
+<p class="text-white/60 text-sm font-normal mt-1 tracking-wide">Generador de Títulos</p>
+</div>
+<nav class="flex-1 py-8 px-6 flex flex-col gap-6 relative">
+<div class="absolute left-[39px] top-12 bottom-12 w-[1px] bg-white/10 z-0"></div>
+<!-- Step 1 (Done) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white/10 border border-white/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-sm text-white">check</span>
+</div>
+<div>
+<p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 1</p>
+<p class="text-white/90 font-medium text-sm">Línea de Investigación</p>
+</div>
+</div>
+<!-- Step 2 (Done) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white/10 border border-white/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-sm text-white">check</span>
+</div>
+<div>
+<p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 2</p>
+<p class="text-white/90 font-medium text-sm">Nivel de Investigación</p>
+</div>
+</div>
+<!-- Step 3 (Active) -->
+<div class="flex items-start gap-4 relative z-10">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-lg shadow-black/40">
+<span class="text-primary text-sm font-bold">3</span>
+</div>
+<div>
+<p class="text-white/70 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 3</p>
+<p class="text-white font-bold text-sm">Unidad de Investigación</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex items-start gap-4 relative z-10 opacity-40">
+<div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="text-white/60 text-sm font-bold">4</span>
+</div>
+<div>
+<p class="text-white/40 text-xs font-bold uppercase tracking-widest mb-0.5">Paso 4</p>
+<p class="text-white/40 font-medium text-sm">Propuestas de Títulos</p>
+</div>
+</div>
+</nav>
+<div class="p-6 border-t border-white/5 text-xs text-white/50">
+<p>UPAO © 2024</p>
+<p>Facultad de Ciencias Económicas</p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-[280px] bg-white min-h-screen">
+<div class="max-w-[1000px] mx-auto py-16 px-12">
+<!-- Header -->
+<header class="mb-12">
+<h2 class="font-display text-4xl font-bold text-primary leading-tight mb-3">Unidad de Investigación</h2>
+<p class="text-lg text-muted">Defina el contexto y el acceso a la información para su estudio contable.</p>
+<div class="h-1 w-20 bg-secondary mt-6 rounded-full"></div>
+</header>
+<!-- Form Area -->
+<form action="#" class="w-full" method="POST">
+<!-- Radio inputs for CSS-only toggle logic -->
+<input checked="" class="segmented-input" id="scope-single" name="scope-logic" type="radio"/>
+<input class="segmented-input" id="scope-group" name="scope-logic" type="radio"/>
+<!-- Row 1: Segmented Control Toggle -->
+<div class="form-row">
+<label class="form-label">¿Dónde realizará la investigación?</label>
+<div class="form-input-container">
+<div class="segmented-control">
+<label class="segmented-label" for="scope-single">
+<span class="segmented-text">Empresa en específico</span>
+</label>
+<label class="segmented-label" for="scope-group">
+<span class="segmented-text">Conjunto de empresas</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Row 2: Checkbox Acceso (Mandatory) -->
+<div class="form-row !mb-10">
+<label class="form-label">Acceso a información</label>
+<div class="form-input-container">
+<div class="flex items-start gap-4 p-5 border border-slate-200 rounded-lg bg-slate-50 transition-colors hover:border-primary/20">
+<div class="flex items-center h-6">
+<input class="h-5 w-5 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer" id="access-confirm" name="access-confirm" required="" type="checkbox"/>
+</div>
+<div class="text-sm">
+<label class="font-bold text-text-main cursor-pointer" for="access-confirm">Confirmo que tengo acceso a la información necesaria para la investigación</label>
+<p class="text-muted mt-1.5 leading-relaxed">Si no se cuenta con acceso, se mostrará una advertencia en el reporte final sobre la viabilidad del estudio.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Combined Conditional Fields Container -->
+<div id="conditional-fields">
+<!-- Tipo de empresa (Common) -->
+<div class="form-row">
+<label class="form-label">Tipo de empresa</label>
+<div class="form-input-container">
+<div class="flex gap-10 items-center py-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" name="company-type" type="radio" value="privada"/>
+<span class="text-sm font-semibold group-hover:text-primary transition-colors">Privada</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-5 h-5 text-primary border-slate-300 focus:ring-primary" name="company-type" type="radio" value="publica"/>
+<span class="text-sm font-semibold group-hover:text-primary transition-colors">Pública</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Nombre / Identificación (Common, dynamic label) -->
+<div class="form-row">
+<label class="form-label dynamic-label" data-group="Identificación del grupo" data-single="Nombre de la empresa" for="company-name"></label>
+<div class="form-input-container relative">
+<input class="editorial-input" id="company-name" name="company-name" placeholder="Ej. Constructora del Norte S.A.C." type="text"/>
+</div>
+</div>
+<!-- Cantidad de empresas (Conditional - Only for Group) -->
+<div class="form-row" id="company-count-row">
+<label class="form-label" for="company-count">Cantidad aprox. de empresas</label>
+<div class="form-input-container">
+<input class="editorial-input" id="company-count" min="1" name="company-count" placeholder="Ej. 15" type="number"/>
+</div>
+</div>
+<!-- Descripción (Common, dynamic label) -->
+<div class="form-row">
+<label class="form-label dynamic-label" data-group="Descripción del grupo" data-single="Descripción de la empresa" for="company-desc"></label>
+<div class="form-input-container">
+<textarea class="editorial-input" id="company-desc" name="company-desc" placeholder="Breve reseña sobre la actividad, alcance y ubicación geográfica..."></textarea>
+</div>
+</div>
+<!-- Giro de negocio (Common) -->
+<div class="form-row">
+<label class="form-label" for="business-sector">Giro de negocio</label>
+<div class="form-input-container">
+<div class="relative">
+<select class="editorial-input appearance-none cursor-pointer pr-10" id="business-sector" name="business-sector">
+<option disabled="" selected="" value="">Seleccione un giro...</option>
+<option value="retail">Retail / Comercio al por menor</option>
+<option value="manufactura">Manufactura e Industria</option>
+<option value="servicios">Servicios</option>
+<option value="agronegocios">Agronegocios</option>
+<option value="construccion">Construcción e Inmobiliaria</option>
+<option value="salud">Salud</option>
+<option value="educacion">Educación</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-primary">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Principal problemática (Common) -->
+<div class="form-row">
+<label class="form-label" for="problem">Principal problemática</label>
+<div class="form-input-container">
+<textarea class="editorial-input editorial-input-large" id="problem" name="problem" placeholder="Detalle el problema identificado, causas y efectos observados en la gestión contable o financiera..."></textarea>
+<p class="text-xs text-muted mt-3">Describa la situación problemática empírica que motiva su investigación.</p>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex justify-between items-center pt-12 border-t border-border-color mt-8">
+<button class="group flex items-center gap-2 text-muted font-bold uppercase tracking-wider text-xs hover:text-primary transition-colors px-4 py-2" type="button">
+<span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                        Regresar
+                    </button>
+<button class="bg-secondary text-white px-12 py-5 rounded-md font-bold uppercase tracking-[0.05em] text-sm hover:brightness-110 transition-all shadow-xl shadow-secondary/30 flex items-center gap-3" type="button">
+                        GENERAR PROPUESTAS
+                        <span class="material-symbols-outlined text-sm">magic_button</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+</body></html>

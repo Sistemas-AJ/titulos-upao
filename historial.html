@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Lora:ital,wght@0,400..700;1,400..700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#003366", // UPAO Corporate Blue
+                        "secondary": "#9c162a", // UPAO Red accent
+                        "background-light": "#f4f7fa",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Lora", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Historial de Consultas - UPAO</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-[#002d5a]">
+<div class="p-6 flex flex-col gap-8 h-full">
+<!-- Logo & Brand -->
+<div class="flex items-center gap-3">
+<div class="size-10 bg-white/10 rounded-lg flex items-center justify-center text-white border border-white/20">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex flex-col">
+<h1 class="dark:text-white text-lg font-bold leading-none tracking-tight text-white">UPAO Dashboard</h1>
+<p class="text-xs font-medium uppercase tracking-wider text-blue-200">Investigación</p>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors group text-blue-100/70 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-blue-300/60">filter_1</span>
+<span class="text-sm font-semibold">Paso 1</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors group text-blue-100/70 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-blue-300/60">filter_2</span>
+<span class="text-sm font-semibold">Paso 2</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors group text-blue-100/70 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-blue-300/60">filter_3</span>
+<span class="text-sm font-semibold">Paso 3</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors group text-blue-100/70 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-blue-300/60">filter_4</span>
+<span class="text-sm font-semibold">Paso 4</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2.5 bg-white/10 text-white rounded-lg border-l-4 border-blue-400 transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-sm font-bold">Historial</span>
+</a>
+<div class="mt-auto border-t dark:border-slate-800 pt-4 flex flex-col gap-1 border-white/10">
+<a class="flex items-center gap-3 px-3 py-2.5 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors group text-blue-100/70 hover:bg-white/10" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors text-blue-300/60">settings</span>
+<span class="text-sm font-semibold">Configuración</span>
+</a>
+</div>
+</nav>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 px-8 flex items-center justify-between bg-white dark:bg-slate-900">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">manage_search</span>
+<h2 class="text-base font-bold text-slate-800 dark:text-white uppercase tracking-tight">Historial de Consultas</h2>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2.5 right-2.5 size-2 bg-secondary rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:border-slate-800"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-bold text-slate-900 dark:text-white leading-none">Dr. Ricardo Palma</p>
+<p class="text-[11px] text-slate-500 font-medium">Investigador Senior</p>
+</div>
+<div class="size-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJlkN-KyrP-UV-kSeH0FQCObWsZLW97FDMkzS9XPZvTwIO0MB6GzRSDAAlSvsf4sD7L6YYcKuo966YBa57kbExkfhWoQBU5_r5zbMAKWeeTikxt_zNIEAwrVdDiYoROno5FLrisimWm2PnujIoBbDdLaW3qDPckf4UYlvruqHA1u06tE7oLGeA6FOJtFh6YY3B2N50jbdydc3hDGdRwEjyzTyhvAYjkWrvP7SU_14yaNTgCRCALUWCFvLkENc_MSnjTXhNkSGBkIoQ"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-6xl mx-auto">
+<!-- Page Intro -->
+<div class="mb-10">
+<h3 class="text-4xl font-display font-bold text-slate-900 dark:text-slate-50 mb-3">Registro de Consultas</h3>
+<p class="text-slate-600 dark:text-slate-400 max-w-2xl text-lg leading-relaxed">Administra y revisa las propuestas de títulos generadas por el sistema de IA para tus diversas líneas de investigación académica.</p>
+</div>
+<!-- Filters & Search -->
+<div class="flex flex-col md:flex-row gap-4 mb-8">
+<div class="flex-1 relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm transition-all outline-none" placeholder="Buscar por título, palabra clave o línea..." type="text"/>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                            Líneas
+                            <span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">calendar_month</span>
+                            Fecha
+                            <span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-3 bg-secondary text-white rounded-lg text-sm font-bold shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all">
+                            Nueva Consulta
+                        </button>
+</div>
+</div>
+<!-- History List -->
+<div class="flex flex-col gap-4">
+<!-- History Item 1 -->
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:border-primary/30 transition-all group shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-3">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest rounded-md">Auditoría</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                        Hace 2 horas (12 Oct, 2023)
+                                    </span>
+</div>
+<h4 class="text-xl font-display font-bold text-slate-900 dark:text-slate-100 mb-3 group-hover:text-primary transition-colors leading-tight">Impacto de la Auditoría Forense en la Detección de Fraude en Entidades Públicas del Perú: Un Estudio Comparativo 2020-2023</h4>
+<div class="flex gap-4">
+<p class="text-sm text-slate-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">description</span>
+                                        5 variantes generadas
+                                    </p>
+<p class="text-sm text-slate-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary">star</span>
+                                        Favorito
+                                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5" title="Ver">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5" title="Copiar">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5" title="Descargar">
+<span class="material-symbols-outlined">download</span>
+</button>
+<div class="w-[1px] h-8 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<button class="p-2.5 text-slate-400 hover:text-secondary transition-colors rounded-lg hover:bg-secondary/5" title="Eliminar">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- History Item 2 -->
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:border-primary/30 transition-all group shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-3">
+<span class="px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-md">Administración</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                        Ayer, 16:45
+                                    </span>
+</div>
+<h4 class="text-xl font-display font-bold text-slate-900 dark:text-slate-100 mb-3 group-hover:text-primary transition-colors leading-tight">Estrategias de Resiliencia Organizacional en Pymes del Sector Manufacturero Post-Pandemia en la Región La Libertad</h4>
+<div class="flex gap-4">
+<p class="text-sm text-slate-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">description</span>
+                                        3 variantes generadas
+                                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">download</span>
+</button>
+<div class="w-[1px] h-8 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<button class="p-2.5 text-slate-400 hover:text-secondary transition-colors rounded-lg hover:bg-secondary/5">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- History Item 3 -->
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:border-primary/30 transition-all group shadow-sm">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-3">
+<span class="px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-md">Derecho</span>
+<span class="text-slate-400 dark:text-slate-500 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                        8 Oct, 2023
+                                    </span>
+</div>
+<h4 class="text-xl font-display font-bold text-slate-900 dark:text-slate-100 mb-3 group-hover:text-primary transition-colors leading-tight">La Responsabilidad Civil del Estado en la Gestión de Conflictos Socioambientales: Análisis de la Jurisprudencia Reciente</h4>
+<div class="flex gap-4">
+<p class="text-sm text-slate-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">description</span>
+                                        8 variantes generadas
+                                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">content_copy</span>
+</button>
+<button class="p-2.5 text-slate-400 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
+<span class="material-symbols-outlined">download</span>
+</button>
+<div class="w-[1px] h-8 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<button class="p-2.5 text-slate-400 hover:text-secondary transition-colors rounded-lg hover:bg-secondary/5">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-800">
+<p class="text-sm text-slate-500 font-medium">Mostrando <span class="font-bold text-slate-900 dark:text-slate-100">1-10</span> de <span class="font-bold text-slate-900 dark:text-slate-100">45</span> consultas</p>
+<div class="flex gap-2">
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold text-sm shadow-md shadow-primary/20">1</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary hover:text-primary transition-colors text-sm font-semibold">2</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary hover:text-primary transition-colors text-sm font-semibold">3</button>
+<button class="size-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Summary Card -->
+<div class="mt-12 bg-primary/5 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between border border-primary/10 gap-6">
+<div class="flex items-center gap-6">
+<div class="size-14 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-primary shadow-sm border border-primary/10">
+<span class="material-symbols-outlined text-2xl">insights</span>
+</div>
+<div>
+<h5 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Resumen Mensual</h5>
+<p class="text-sm text-slate-600 dark:text-slate-400">Has generado <span class="font-bold text-primary">24 títulos</span> este mes. Te quedan <span class="font-bold text-primary">76 créditos</span> de investigación.</p>
+</div>
+</div>
+<button class="px-6 py-2.5 border-2 border-primary text-primary font-bold rounded-lg hover:bg-primary hover:text-white transition-all">
+                        Ver Estadísticas
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

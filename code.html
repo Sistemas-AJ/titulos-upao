@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UPAO Dashboard - Línea de Investigación</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<!-- Using Roboto Slab as fallback for Vitesse (Serif) and Inter/Geogrotesque alternatives -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700&amp;family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056A3",
+                        "secondary": "#0056A3", // Changed from #EE8600 to Corporate Blue
+                        "background-light": "#F4F7FA",
+                        "surface": "#FFFFFF",
+                        "text-main": "#1A2B3B",
+                        "muted": "#64748B",
+                        "border-color": "#E2E8F0",
+                        "sidebar-bg": "#0056A3"
+                    },
+                    fontFamily: {
+                        "display": ["'Roboto Slab'", "serif"],
+                        "body": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "2px",
+                        "lg": "4px",
+                        "xl": "8px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6, .font-display {
+            font-family: 'Roboto Slab', serif;
+        }
+        
+        .domain-card-input:checked + .domain-card {
+            border-color: theme('colors.primary');
+            border-width: 2px;
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 86, 163, 0.1);
+        }
+        
+        .domain-card {
+            border-width: 1px;
+            border-color: theme('colors.border-color');
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .domain-card:hover {
+            border-color: theme('colors.primary');
+            transform: translateY(-4px);
+        }
+
+        /* Show sub-lines only when a main line is selected */
+        #sublines-container {
+            display: none;
+        }
+        body:has(.domain-card-input:checked) #sublines-container {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .subline-input:checked + .subline-card {
+            background-color: theme('colors.primary');
+            color: white;
+            border-color: theme('colors.primary');
+        }
+
+        body:has(.subline-input:checked) #btn-continuar {
+            opacity: 1;
+            pointer-events: auto;
+            background-color: theme('colors.primary');
+        }
+        
+        #btn-continuar {
+            opacity: 0.5;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-step-active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid white;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-text-main min-h-screen antialiased">
+<div class="flex h-screen w-full overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-[320px] shrink-0 bg-sidebar-bg flex flex-col h-full text-white">
+<div class="p-10 border-b border-white/10">
+<h1 class="font-display text-2xl font-bold tracking-tight text-white">UPAO <span class="font-light opacity-80 italic">Investiga</span></h1>
+<p class="text-xs text-white/60 mt-2 font-body uppercase tracking-widest">Plataforma de Tesis</p>
+</div>
+<nav class="flex-1 py-8">
+<ul class="space-y-1">
+<!-- Step 1: Active -->
+<li class="sidebar-step-active px-10 py-6 flex items-start gap-5">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white text-primary text-sm font-bold shrink-0">
+                        1
+                    </div>
+<div>
+<p class="text-white font-bold text-sm uppercase tracking-wider font-body">Línea de Investigación</p>
+<p class="text-xs mt-1 leading-relaxed text-white/70">Paso 1: Contabilidad</p>
+</div>
+</li>
+<!-- Step 2: Inactive -->
+<li class="px-10 py-6 flex items-start gap-5 opacity-40">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white text-sm font-bold shrink-0">
+                        2
+                    </div>
+<div>
+<p class="text-white font-semibold text-sm uppercase tracking-wider font-body">Nivel de Investigación</p>
+<p class="text-xs mt-1 leading-relaxed text-white/70">Profundidad del estudio</p>
+</div>
+</li>
+<!-- Step 3: Inactive -->
+<li class="px-10 py-6 flex items-start gap-5 opacity-40">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white text-sm font-bold shrink-0">
+                        3
+                    </div>
+<div>
+<p class="text-white font-semibold text-sm uppercase tracking-wider font-body">Alcance Empresarial</p>
+<p class="text-xs mt-1 leading-relaxed text-white/70">Sector y delimitación</p>
+</div>
+</li>
+<!-- Step 4: Inactive -->
+<li class="px-10 py-6 flex items-start gap-5 opacity-40">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white text-sm font-bold shrink-0">
+                        4
+                    </div>
+<div>
+<p class="text-white font-semibold text-sm uppercase tracking-wider font-body">Propuestas de Títulos</p>
+<p class="text-xs mt-1 leading-relaxed text-white/70">Generación de resultados</p>
+</div>
+</li>
+<!-- Step 5: Inactive (Historial) -->
+<li class="px-10 py-6 flex items-start gap-5 opacity-40">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white text-sm font-bold shrink-0">
+                        5
+                    </div>
+<div>
+<p class="text-white font-semibold text-sm uppercase tracking-wider font-body">Historial</p>
+<p class="text-xs mt-1 leading-relaxed text-white/70">Registros anteriores</p>
+</div>
+</li>
+</ul>
+</nav>
+<div class="p-10 border-t border-white/10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">school</span>
+</div>
+<span class="text-[11px] font-bold uppercase tracking-widest text-white/80">Facultad de Contabilidad</span>
+</div>
+<p class="text-[10px] text-white/40 font-body leading-relaxed">
+                Herramienta exclusiva para el desarrollo de proyectos de titulación profesional.
+            </p>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-light flex flex-col">
+<!-- Persistent Header Note -->
+<div class="bg-white border-b border-border-color px-12 py-4 flex items-center justify-between sticky top-0 z-10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">verified_user</span>
+<p class="text-[13px] text-muted font-body">
+                    Usted está utilizando el asistente de generación de tesis UPAO v2.0
+                </p>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-xs font-bold text-primary hover:underline">Guía Metodológica</button>
+<div class="h-4 w-[1px] bg-border-color"></div>
+<button class="text-xs font-bold text-primary hover:underline">Soporte</button>
+</div>
+</div>
+<div class="max-w-[1100px] mx-auto px-12 py-12 flex-1 flex flex-col w-full">
+<!-- Header -->
+<header class="mb-12">
+<span class="text-primary font-bold text-xs uppercase tracking-widest mb-3 block">Módulo 01</span>
+<h2 class="font-display text-[42px] leading-tight text-primary font-bold mb-6 italic">Selección de Línea de Investigación</h2>
+<p class="text-lg text-muted font-body max-w-3xl leading-relaxed">
+                    Para iniciar su proceso de graduación, elija el área de especialización contable en la que desea centrar su estudio. Esta elección determinará las variables y el marco normativo aplicable a su investigación académica.
+                </p>
+</header>
+<!-- Grid Form -->
+<form class="flex-1 flex flex-col">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+<!-- Card 1: Tributación -->
+<label class="cursor-pointer group">
+<input class="peer sr-only domain-card-input" name="domain" type="radio" value="tributacion"/>
+<div class="domain-card h-full min-h-[220px] bg-surface p-8 border-b-4 border-b-transparent peer-checked:border-b-primary flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-muted text-3xl group-hover:text-primary transition-colors">account_balance</span>
+<div class="w-2 h-2 rounded-full bg-border-color peer-checked:bg-primary"></div>
+</div>
+<h3 class="font-display text-2xl font-bold text-primary mb-3">Tributación</h3>
+<p class="text-sm text-muted leading-relaxed font-body flex-1">
+                                Análisis crítico de la política fiscal y su impacto empresarial. Enfocada en el cumplimiento normativo, estrategias de planeamiento legal y la defensa del contribuyente ante la administración.
+                            </p>
+</div>
+</label>
+<!-- Card 2: Finanzas -->
+<label class="cursor-pointer group">
+<input class="peer sr-only domain-card-input" name="domain" type="radio" value="finanzas"/>
+<div class="domain-card h-full min-h-[220px] bg-surface p-8 border-b-4 border-b-transparent peer-checked:border-b-primary flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-muted text-3xl group-hover:text-primary transition-colors">analytics</span>
+<div class="w-2 h-2 rounded-full bg-border-color peer-checked:bg-primary"></div>
+</div>
+<h3 class="font-display text-2xl font-bold text-primary mb-3">Finanzas</h3>
+<p class="text-sm text-muted leading-relaxed font-body flex-1">
+                                Investigación sobre la gestión de recursos de capital, valoración de empresas y mercados financieros. Fundamental para el desarrollo de modelos de inversión y sostenibilidad corporativa.
+                            </p>
+</div>
+</label>
+<!-- Card 3: Auditoría -->
+<label class="cursor-pointer group">
+<input class="peer sr-only domain-card-input" name="domain" type="radio" value="auditoria"/>
+<div class="domain-card h-full min-h-[220px] bg-surface p-8 border-b-4 border-b-transparent peer-checked:border-b-primary flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-muted text-3xl group-hover:text-primary transition-colors">fact_check</span>
+<div class="w-2 h-2 rounded-full bg-border-color peer-checked:bg-primary"></div>
+</div>
+<h3 class="font-display text-2xl font-bold text-primary mb-3">Auditoría</h3>
+<p class="text-sm text-muted leading-relaxed font-body flex-1">
+                                Examen sistemático de la información y procesos para garantizar la transparencia. Abarca el control interno preventivo y la detección de riesgos en diversos entornos organizacionales.
+                            </p>
+</div>
+</label>
+<!-- Card 4: Contabilidad -->
+<label class="cursor-pointer group">
+<input class="peer sr-only domain-card-input" name="domain" type="radio" value="contabilidad"/>
+<div class="domain-card h-full min-h-[220px] bg-surface p-8 border-b-4 border-b-transparent peer-checked:border-b-primary flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-muted text-3xl group-hover:text-primary transition-colors">menu_book</span>
+<div class="w-2 h-2 rounded-full bg-border-color peer-checked:bg-primary"></div>
+</div>
+<h3 class="font-display text-2xl font-bold text-primary mb-3">Contabilidad</h3>
+<p class="text-sm text-muted leading-relaxed font-body flex-1">
+                                Estudio de la doctrina contable y las NIIF. Se centra en la arquitectura de la información financiera y su utilidad para la toma de decisiones económicas en un entorno globalizado.
+                            </p>
+</div>
+</label>
+<!-- Card 5: Costos -->
+<label class="cursor-pointer group">
+<input class="peer sr-only domain-card-input" name="domain" type="radio" value="costos"/>
+<div class="domain-card h-full min-h-[220px] bg-surface p-8 border-b-4 border-b-transparent peer-checked:border-b-primary flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-muted text-3xl group-hover:text-primary transition-colors">calculate</span>
+<div class="w-2 h-2 rounded-full bg-border-color peer-checked:bg-primary"></div>
+</div>
+<h3 class="font-display text-2xl font-bold text-primary mb-3">Costos</h3>
+<p class="text-sm text-muted leading-relaxed font-body flex-1">
+                                Optimización de la cadena de valor y gestión estratégica de recursos. Esencial para la determinación de precios, rentabilidad de procesos y control de eficiencia operativa.
+                            </p>
+</div>
+</label>
+</div>
+<!-- Sub-lines Section (Visible when main line selected) -->
+<div class="mb-16 border-t-2 border-primary/10 pt-12" id="sublines-container">
+<div class="flex items-center gap-4 mb-8">
+<div class="h-px bg-primary/20 flex-1"></div>
+<h4 class="font-display text-xl font-bold text-primary uppercase tracking-wider text-center px-4">Especifique su Sub-línea de Investigación</h4>
+<div class="h-px bg-primary/20 flex-1"></div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="forense"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+<span>Auditoría Forense</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="cumplimiento"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+<span>Cumplimiento Normativo</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="operativa"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">settings_suggest</span>
+<span>Auditoría Operativa</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="gestion"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+<span>Auditoría de Gestión</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="gubernamental"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+<span>Auditoría Gubernamental</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="interna"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Control Interno</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="sistemas"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">database</span>
+<span>Auditoría de Sistemas</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="tributaria"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span>Auditoría Tributaria</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="ambiental"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">eco</span>
+<span>Auditoría Ambiental</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only subline-input" name="subline" type="radio" value="etica"/>
+<div class="subline-card border border-border-color bg-white px-4 py-6 rounded text-center text-xs font-bold uppercase tracking-tight hover:border-primary transition-all flex flex-col items-center justify-center gap-2 h-full">
+<span class="material-symbols-outlined text-[18px]">balance</span>
+<span>Ética y Responsabilidad</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Action Area -->
+<div class="mt-auto py-8 border-t border-border-color flex items-center justify-between">
+<div class="flex items-center gap-3 text-muted">
+<span class="material-symbols-outlined text-primary text-xl">info</span>
+<div class="text-xs font-body leading-tight">
+<p class="font-bold text-text-main">Flujo de Selección:</p>
+<p class="italic">1. Elija Línea Principal  →  2. Especifique Sub-línea  →  3. Continuar</p>
+</div>
+</div>
+<button class="bg-muted text-white font-body font-bold text-sm uppercase tracking-widest px-12 py-5 shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-3" id="btn-continuar" type="button">
+                        Continuar Proceso
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+</div>
+</body></html>
