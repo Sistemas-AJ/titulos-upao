@@ -233,7 +233,7 @@ const retryGeneration = async () => {
       <div class="mb-10 p-4 bg-amber-50 border-l-4 border-amber-400 flex items-center gap-3">
         <span class="material-symbols-outlined text-amber-600">info</span>
         <p class="text-sm text-amber-800 font-medium">
-          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor. La selección guardada se conserva solo en este dispositivo durante 5 días.
+          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor.
         </p>
       </div>
 

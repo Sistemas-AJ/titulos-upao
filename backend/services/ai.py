@@ -36,7 +36,7 @@ def build_user_prompt(payload: TitleGenerationRequest, reference_titles: list[st
 Titulos de referencia registrados para esta linea y sublinea:
 {formatted_examples}
 
-Usalos solo como referencia de estilo, estructura y enfoque. No los copies literalmente. En cuanto al espacio considera Piura en lugar de Trujillo
+Usalos solo como referencia de estilo, estructura y enfoque. No los copies literalmente. En cuanto al espacio debe ser Piura y el año 2026. 
 """.rstrip()
 
     return f"""

@@ -28,6 +28,7 @@ services:
     environment:
       BASE_HOST: postgres
       BASE_PORT: 5432
+    command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
     ports:
       - "8000:8000"
     volumes:
@@ -35,6 +36,29 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  cleanup-cron:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: titulos-upao-cleanup-cron
+    env_file:
+      - backend/.env
+    environment:
+      CLEANUP_URL: http://backend:8000/api/title-sessions/expired
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "0 0 * * * root python /app/backend/scripts/delete_expired_sessions.py >> /proc/1/fd/1 2>> /proc/1/fd/2" > /etc/cron.d/delete-expired
+        chmod 0644 /etc/cron.d/delete-expired
+        crontab /etc/cron.d/delete-expired
+        cron -f
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      backend:
+        condition: service_started
 
 volumes:
   postgres_data:

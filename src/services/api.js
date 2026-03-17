@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -25,7 +25,7 @@ export const generateProposals = async (wizardState) => {
   }
 
   try {
-    const { data } = await apiClient.post('/api/title-sessions', payload)
+    const { data } = await apiClient.post('/title-sessions', payload)
     return data
   } catch (error) {
     const detail = error.response?.data?.detail
@@ -46,7 +46,7 @@ export const generateProposals = async (wizardState) => {
 
 export const getResearchCatalog = async () => {
   try {
-    const { data } = await apiClient.get('/api/reference-titles/catalog')
+    const { data } = await apiClient.get('/reference-titles/catalog')
     return data
   } catch {
     return []
@@ -62,7 +62,7 @@ export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = 
     if (q && q.trim() !== '') {
       params.q = q.trim()
     }
-    const { data } = await apiClient.get('/api/reference-titles/paged', { params })
+    const { data } = await apiClient.get('/reference-titles/paged', { params })
     return data
   } catch (error) {
     console.error('Failed to fetch reference titles:', error)
