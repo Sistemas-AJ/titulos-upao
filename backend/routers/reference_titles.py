@@ -6,6 +6,8 @@ from backend.models.reference_title import ReferenceTitle
 from backend.schemas.reference_title import (
     ReferenceTitleCreate,
     ReferenceTitleImportResponse,
+    ReferenceTitleListItem,
+    ReferenceTitlePage,
     ReferenceTitleRead,
     ResearchLineCatalogItem,
     ResearchSublineCatalogItem,
@@ -14,6 +16,7 @@ from backend.services.reference_title_importer import parse_reference_titles_exc
 
 
 router = APIRouter(prefix="/api/reference-titles", tags=["reference-titles"])
+PAGE_SIZE = 20
 
 
 def prettify_catalog_label(value: str) -> str:
@@ -27,6 +30,18 @@ def to_reference_title_read(item: ReferenceTitle) -> ReferenceTitleRead:
         linea_investigacion=item.linea_investigacion,
         sub_linea=item.sub_linea,
         created_at=item.created_at,
+        authors=item.authors,
+        status=item.status,
+    )
+
+
+def to_reference_title_list_item(item: ReferenceTitle) -> ReferenceTitleListItem:
+    return ReferenceTitleListItem(
+        titulo_investigacion=item.titulo_investigacion,
+        linea_investigacion=item.linea_investigacion,
+        sub_linea=item.sub_linea,
+        authors=item.authors,
+        status=item.status,
     )
 
 
@@ -56,7 +71,7 @@ async def import_reference_titles(
             select(ReferenceTitle).where(
                 ReferenceTitle.titulo_investigacion == item.titulo_investigacion,
                 ReferenceTitle.linea_investigacion == item.linea_investigacion,
-                ReferenceTitle.sub_linea == item.sub_linea,
+                ReferenceTitle.sub_linea == item.sub_linea
             )
         ).first()
 
@@ -105,6 +120,40 @@ def list_reference_titles(
 
     items = session.exec(statement.order_by(ReferenceTitle.created_at.desc()).limit(limit)).all()
     return [to_reference_title_read(item) for item in items]
+
+
+@router.get("/paged", response_model=ReferenceTitlePage)
+def list_reference_titles_paged(
+    linea_investigacion: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    session: Session = Depends(get_session),
+):
+    statement = select(ReferenceTitle)
+    if linea_investigacion:
+        statement = statement.where(ReferenceTitle.linea_investigacion == linea_investigacion)
+
+    total = len(session.exec(statement).all())
+    offset = (page - 1) * PAGE_SIZE
+    items = session.exec(
+        statement
+        .order_by(
+            ReferenceTitle.linea_investigacion.asc(),
+            ReferenceTitle.sub_linea.asc(),
+            ReferenceTitle.titulo_investigacion.asc(),
+        )
+        .offset(offset)
+        .limit(PAGE_SIZE)
+    ).all()
+
+    total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE if total else 0
+
+    return ReferenceTitlePage(
+        items=[to_reference_title_list_item(item) for item in items],
+        page=page,
+        page_size=PAGE_SIZE,
+        total=total,
+        total_pages=total_pages,
+    )
 
 
 @router.get("/catalog", response_model=list[ResearchLineCatalogItem])

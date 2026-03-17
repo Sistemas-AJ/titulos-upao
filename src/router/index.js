@@ -36,11 +36,6 @@ const router = createRouter({
           component: PropuestasTitulos
         },
         {
-          path: 'herramientas/historial',
-          name: 'Historial',
-          component: HistorialConsultas
-        },
-        {
           path: 'herramientas/base-datos',
           name: 'BaseDatos',
           component: BaseDatosTesis

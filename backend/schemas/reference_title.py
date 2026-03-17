@@ -8,6 +8,9 @@ class ReferenceTitleCreate(SQLModel):
     titulo_investigacion: str
     linea_investigacion: str
     sub_linea: str
+    authors: str = ""
+    status: str = "APROVADO"
+
 
 
 class ReferenceTitleRead(SQLModel):
@@ -16,6 +19,24 @@ class ReferenceTitleRead(SQLModel):
     linea_investigacion: str
     sub_linea: str
     created_at: datetime
+    authors: str
+    status: str
+
+
+class ReferenceTitleListItem(SQLModel):
+    titulo_investigacion: str
+    linea_investigacion: str
+    sub_linea: str
+    authors: str
+    status: str
+
+
+class ReferenceTitlePage(SQLModel):
+    items: list[ReferenceTitleListItem]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
 
 
 class ReferenceTitleImportResponse(SQLModel):

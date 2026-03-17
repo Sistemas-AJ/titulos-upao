@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
 import { generateProposals } from '@/services/api'
@@ -28,6 +28,10 @@ onMounted(() => {
     form.value = { ...store.step3 }
   }
 })
+
+watch(form, (newVal) => {
+  store.setStep3(newVal)
+}, { deep: true })
 
 const isGroup = computed(() => form.value.scopeType === 'group')
 

@@ -31,37 +31,32 @@ const steps = computed(() => [
     title: 'Línea de Investigación',
     subtitle: 'Área de estudio',
     completedText: store.step1.subline || 'Completado',
-    isCompleted: store.isStep1Complete && currentStepIndex.value > 1
+    isCompleted: store.isStep1Complete && (currentStepIndex.value > 1 || currentStepIndex.value === 0)
   },
   {
     index: 2,
     title: 'Nivel de Investigación',
     subtitle: 'Profundidad del estudio',
     completedText: store.step2.level || 'Completado',
-    isCompleted: store.isStep2Complete && currentStepIndex.value > 2
+    isCompleted: store.isStep2Complete && (currentStepIndex.value > 2 || currentStepIndex.value === 0)
   },
   {
     index: 3,
     title: 'Alcance Empresarial',
     subtitle: 'Sector y delimitación',
     completedText: store.step3.name || 'Completado',
-    isCompleted: store.isStep3Complete && currentStepIndex.value > 3
+    isCompleted: store.isStep3Complete && (currentStepIndex.value > 3 || currentStepIndex.value === 0)
   },
   {
     index: 4,
     title: 'Propuestas de Títulos',
     subtitle: 'Generación de resultados',
     completedText: store.step4.selectedTitles.length > 0 ? `${store.step4.selectedTitles.length} Seleccionados` : 'Completado',
-    isCompleted: store.step4.selectedTitles.length > 0 && currentStepIndex.value > 4
+    isCompleted: store.step4.selectedTitles.length > 0 && (currentStepIndex.value > 4 || currentStepIndex.value === 0)
   }
 ])
 
 const tools = [
-  {
-    label: 'Historial',
-    icon: 'history',
-    path: '/herramientas/historial'
-  },
   {
     label: 'Base de Datos de Tesis',
     icon: 'database',

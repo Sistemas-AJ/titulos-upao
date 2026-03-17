@@ -26,7 +26,19 @@ EXPECTED_HEADERS = {
         "sub-línea",
         "sub línea",
     },
+    "authors": {
+        "authors",
+        "author",
+        "autores",
+        "autor",
+    },
+    "status": {
+        "status",
+        "estado",
+    },
 }
+
+REQUIRED_FIELDS = {"titulo_investigacion", "linea_investigacion", "sub_linea"}
 
 
 def normalize_header(value: str | None) -> str:
@@ -44,7 +56,7 @@ def resolve_column_map(headers: list[str]) -> dict[str, int]:
                 column_map[field_name] = index
                 break
 
-    missing_fields = [field for field in EXPECTED_HEADERS if field not in column_map]
+    missing_fields = [field for field in REQUIRED_FIELDS if field not in column_map]
     if missing_fields:
         raise ValueError(
             "El Excel debe incluir las columnas titulo_investigacion, linea_investigacion y sub_linea"
@@ -69,6 +81,12 @@ def parse_reference_titles_excel(file_bytes: bytes) -> list[ReferenceTitleCreate
         titulo = str(row[column_map["titulo_investigacion"]]).strip() if row[column_map["titulo_investigacion"]] is not None else ""
         linea = str(row[column_map["linea_investigacion"]]).strip() if row[column_map["linea_investigacion"]] is not None else ""
         sub_linea = str(row[column_map["sub_linea"]]).strip() if row[column_map["sub_linea"]] is not None else ""
+        authors_index = column_map.get("authors")
+        status_index = column_map.get("status")
+
+        authors = str(row[authors_index]).strip() if authors_index is not None and row[authors_index] is not None else ""
+        status = str(row[status_index]).strip() if status_index is not None and row[status_index] is not None else "APROVADO"
+
 
         if not titulo and not linea and not sub_linea:
             continue
@@ -81,6 +99,8 @@ def parse_reference_titles_excel(file_bytes: bytes) -> list[ReferenceTitleCreate
                 titulo_investigacion=titulo,
                 linea_investigacion=linea,
                 sub_linea=sub_linea,
+                authors=authors,
+                status=status or "APROVADO",
             )
         )
 
