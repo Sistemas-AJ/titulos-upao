@@ -65,7 +65,7 @@ class AIProposalSchema(SQLModel):
 class AIProposalPayload(SQLModel):
     model_config = ConfigDict(extra="forbid")
 
-    proposals: list[AIProposalSchema] = Field(min_length=5, max_length=5)
+    proposals: list[AIProposalSchema] = Field(min_length=5, max_length=10)
 
 
 class TitleSessionRead(SQLModel):

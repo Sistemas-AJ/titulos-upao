@@ -22,7 +22,7 @@ Responde solo JSON valido con esta estructura exacta:
     }
   ]
 }
-Genera exactamente 5 propuestas.
+Genera exactamente 10 propuestas.
 No agregues markdown ni explicaciones.
 """.strip()
 

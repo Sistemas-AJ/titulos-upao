@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, delete, select
 
 from backend.config import get_settings
+from backend.dependencies.auth import get_optional_current_user
 from backend.database.session import get_session
 from backend.models.title_session import SessionStatus, TitleProposal, TitleSession
 from backend.models.user import User
@@ -76,8 +77,11 @@ def to_frontend_proposals(proposals: list[TitleProposal]) -> list[TitleProposalF
 def create_title_session(
     payload: TitleGenerationRequest,
     session: Session = Depends(get_session),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
-    if payload.user_id and not session.get(User, payload.user_id):
+    effective_user_id = current_user.id if current_user else payload.user_id
+
+    if effective_user_id and not session.get(User, effective_user_id):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     reference_titles = get_reference_examples(
@@ -100,7 +104,8 @@ def create_title_session(
 
     settings = get_settings()
     db_session = TitleSession(
-        **payload.model_dump(),
+        **payload.model_dump(exclude={"user_id"}),
+        user_id=effective_user_id,
         expires_at=datetime.now(timezone.utc) + timedelta(hours=settings.session_ttl_hours),
     )
     session.add(db_session)

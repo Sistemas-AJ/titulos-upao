@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     base_host: str = Field(alias="BASE_HOST")
     base_port: int = Field(alias="BASE_PORT")
     model_ia: str = Field(alias="MODEL_IA")
+    auth_secret_key: str = Field(default="change-this-auth-secret", alias="AUTH_SECRET_KEY")
+    auth_token_ttl_minutes: int = Field(default=1440, alias="AUTH_TOKEN_TTL_MINUTES")
+    login_rate_limit_per_minute: int = Field(default=2, alias="LOGIN_RATE_LIMIT_PER_MINUTE")
+    login_min_interval_seconds: int = Field(default=3, alias="LOGIN_MIN_INTERVAL_SECONDS")
+    recaptcha_secret_key: str | None = Field(default=None, alias="RECAPTCHA_SECRET_KEY")
     app_name: str = "Titulos UPAO API"
     session_ttl_hours: int = 24
     cors_origins: list[str] = [
@@ -41,4 +46,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
