@@ -1,117 +1,152 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import { getReferenceTitlesPaged } from '@/services/api'
 
-// Simulated backend data
-const allRecords = ref([
-  {
-    id: 'T-2023-0452',
-    linea: 'Tributación Nacional',
-    categoria: 'Tributación',
-    titulo: 'Impacto de la recaudación del impuesto predial en la gestión financiera de la Municipalidad de Trujillo, 2022',
-    autor: 'Castillo Mendoza, Roberto',
-    fecha: '12/11/2023',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'T-2023-0918',
-    linea: 'Tributación Empresarial',
-    categoria: 'Tributación',
-    titulo: 'Estrategias de planeamiento tributario y su relación con la rentabilidad en empresas del sector construcción',
-    autor: 'Díaz Palacios, Elena',
-    fecha: '05/08/2022',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'T-2024-0124',
-    linea: 'Derecho Tributario',
-    categoria: 'Tributación',
-    titulo: 'Análisis de la elusión fiscal en el marco de la Norma XVI del Título Preliminar del Código Tributario',
-    autor: 'Ruiz Galarreta, Carlos',
-    fecha: '15/01/2024',
-    estado: 'En Revisión',
-    estadoIcon: 'pending',
-    estadoColor: 'text-secondary'
-  },
-  {
-    id: 'T-2023-0876',
-    linea: 'Política Fiscal',
-    categoria: 'Tributación',
-    titulo: 'Incidencia de los incentivos tributarios en la inversión de las Micro y Pequeñas Empresas de la Región La Libertad',
-    autor: 'Sánchez Flores, María',
-    fecha: '20/10/2023',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'F-2023-0321',
-    linea: 'Finanzas Corporativas',
-    categoria: 'Finanzas',
-    titulo: 'Gestión del riesgo financiero y su impacto en la rentabilidad de las empresas del sector minero, 2022',
-    autor: 'Torres Vera, Andrés',
-    fecha: '08/07/2023',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'F-2022-0755',
-    linea: 'Mercados de Capital',
-    categoria: 'Finanzas',
-    titulo: 'Análisis del apalancamiento financiero y su efecto en el valor de las empresas listadas en la BVL, 2020-2022',
-    autor: 'López Campos, Paola',
-    fecha: '22/03/2022',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'A-2023-0610',
-    linea: 'Auditoría Interna',
-    categoria: 'Auditoría',
-    titulo: 'El control interno y su relación con la gestión administrativa en las instituciones educativas públicas de Piura, 2022',
-    autor: 'Guerrero Neyra, Sofía',
-    fecha: '30/09/2023',
-    estado: 'Aprobada',
-    estadoIcon: 'check_circle',
-    estadoColor: 'text-green-600'
-  },
-  {
-    id: 'C-2024-0053',
-    linea: 'Contabilidad de Gestión',
-    categoria: 'Contabilidad',
-    titulo: 'Implementación de NIIF 15 y su impacto en el reconocimiento de ingresos en empresas constructoras, 2023',
-    autor: 'Medina Castillo, Luis',
-    fecha: '10/02/2024',
-    estado: 'En Revisión',
-    estadoIcon: 'pending',
-    estadoColor: 'text-secondary'
-  },
-])
-
-const tabs = ['Todos', 'Tributación', 'Finanzas', 'Auditoría', 'Contabilidad', 'Costos', 'Gestión Pública']
+// We map our visual tabs to the specific backend "linea_investigacion" values. 
+// For 'Todos', we will send null/undefined to let the backend return all.
+// The possible lines per user requirement are: auditoria, contabilidad, costos, finanzas, tributacion
+const tabs = ['Todos', 'auditoria', 'contabilidad', 'costos', 'finanzas', 'tributacion']
 const activeTab = ref('Todos')
+
+const records = ref([])
+const isLoading = ref(false)
 const searchQuery = ref('')
+const debouncedSearch = ref('')
+let searchTimeout = null
 const selectedAbstract = ref(null)
 
-const filtered = computed(() => {
-  let data = allRecords.value
-  if (activeTab.value !== 'Todos') {
-    data = data.filter(r => r.categoria === activeTab.value)
+// Pagination state
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
+const pageSize = ref(10)
+
+const fetchRecords = async () => {
+  isLoading.value = true
+  try {
+    const linea = activeTab.value === 'Todos' ? null : activeTab.value
+    // API Call
+    const response = await getReferenceTitlesPaged({
+      page: currentPage.value,
+      linea_investigacion: linea,
+      q: debouncedSearch.value
+    })
+    
+    // Schema mapping based on real JSON structure
+    records.value = response.items || []
+    
+    // Mapping exact keys from backend
+    if (response.total_pages !== undefined) totalPages.value = response.total_pages
+    if (response.total !== undefined) totalItems.value = response.total
+    if (response.page_size !== undefined) pageSize.value = response.page_size
+    // Ensure currentPage syncs with backend if it modified it
+    if (response.page !== undefined) currentPage.value = response.page
+  } catch (err) {
+    console.error(err)
+    records.value = []
+  } finally {
+    isLoading.value = false
   }
-  if (searchQuery.value.trim()) {
-    const q = searchQuery.value.toLowerCase()
-    data = data.filter(r =>
-      r.titulo.toLowerCase().includes(q) ||
-      r.autor.toLowerCase().includes(q) ||
-      r.id.toLowerCase().includes(q)
-    )
+}
+
+// Watchers
+watch(activeTab, () => {
+  currentPage.value = 1 // Reset to page 1 on tab change
+  fetchRecords()
+})
+
+watch(currentPage, () => {
+  fetchRecords()
+})
+
+watch(searchQuery, (newVal) => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = newVal
+    currentPage.value = 1 // Any new search implies we return to page 1
+    fetchRecords()
+  }, 500) // 500ms debounce
+})
+
+onMounted(() => {
+  fetchRecords()
+})
+
+const getStatusIcon = (status) => {
+  const s = (status || '').toUpperCase()
+  if (s.includes('APROVADO') || s.includes('APROBADO')) return 'check_circle'
+  return 'pending'
+}
+
+const getStatusColor = (status) => {
+  const s = (status || '').toUpperCase()
+  if (s.includes('APROVADO') || s.includes('APROBADO')) return 'text-green-600'
+  return 'text-secondary'
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
   }
-  return data
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// Helper para resaltar la búsqueda con color anaranjado
+const highlightMatch = (text, term) => {
+  if (!text) return ''
+  if (!term || term.trim() === '') return text
+  
+  // Escape caracteres especiales de RegExp en el término de búsqueda
+  const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escapedTerm})`, 'gi')
+  
+  // Reemplazamos la coincidencia con un span anaranjado
+  return text.replace(regex, '<span class="bg-orange-300 text-orange-900 font-bold px-1 rounded-sm">$1</span>')
+}
+
+// Compute the visible page buttons to avoid long rows of buttons
+const visiblePages = computed(() => {
+  const current = currentPage.value;
+  const total = totalPages.value;
+  const delta = 2; // Number of items to show around current page
+  
+  if (total <= 7) {
+    // Show all if 7 or less
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  
+  const pages = [];
+  
+  // Left side
+  if (current - delta > 2) {
+    pages.push(1, '...');
+    for (let i = current - delta; i <= current; i++) {
+        pages.push(i);
+    }
+  } else {
+    for (let i = 1; i <= current; i++) {
+        pages.push(i);
+    }
+  }
+  
+  // Right side
+  if (current + delta < total - 1) {
+    for (let i = current + 1; i <= current + delta; i++) {
+        pages.push(i);
+    }
+    pages.push('...', total);
+  } else {
+    for (let i = current + 1; i <= total; i++) {
+        pages.push(i);
+    }
+  }
+  
+  return pages;
 })
 </script>
 
@@ -126,8 +161,8 @@ const filtered = computed(() => {
         <div class="h-1 w-20 bg-secondary mt-4 rounded-full"></div>
       </div>
       <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-background-light border border-border-color px-3 py-2 text-text-muted">
-        <span class="material-symbols-outlined text-sm">storage</span>
-        Local DB v2.4
+        <span class="material-symbols-outlined text-sm">cloud_sync</span>
+        API Conectada
       </div>
     </header>
 
@@ -141,7 +176,7 @@ const filtered = computed(() => {
           <input
             v-model="searchQuery"
             class="w-full pl-12 pr-4 py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base"
-            placeholder="Buscar por título exacto, autor o código de registro..."
+            placeholder="Buscar por título exacto o autor..."
             type="text"
           />
         </div>
@@ -157,7 +192,7 @@ const filtered = computed(() => {
           v-for="tab in tabs"
           :key="tab"
           @click="activeTab = tab"
-          class="px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors"
+          class="px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors capitalize"
           :class="activeTab === tab
             ? 'border-b-[3px] border-primary text-primary font-bold -mb-px'
             : 'text-text-muted hover:text-primary'"
@@ -168,32 +203,36 @@ const filtered = computed(() => {
     </section>
 
     <!-- Records Table -->
-    <div class="bg-surface border border-border-color divide-y divide-border-color flex-1">
+    <div class="bg-surface border border-border-color divide-y divide-border-color flex-1 relative">
+      <div v-if="isLoading" class="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+        <div class="flex flex-col items-center gap-3">
+          <span class="material-symbols-outlined animate-spin text-4xl text-primary">sync</span>
+          <span class="text-sm font-bold text-primary animate-pulse tracking-widest uppercase">Cargando datos...</span>
+        </div>
+      </div>
+
       <div
-        v-for="record in filtered"
-        :key="record.id"
+        v-for="(record, index) in records"
+        :key="index"
         class="p-6 hover:bg-background-light transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group"
       >
         <div class="flex-1 flex flex-col gap-2">
           <div class="flex items-center gap-3">
-            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-sm">{{ record.id }}</span>
-            <span class="text-xs text-text-muted font-medium italic">Línea: {{ record.linea }}</span>
+            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-sm capitalize">{{ record.linea_investigacion }}</span>
+            <span class="text-xs text-text-muted font-medium italic capitalize" v-if="record.sub_linea">Sublínea: {{ record.sub_linea }}</span>
           </div>
-          <h3 class="font-display font-bold text-lg text-text-main group-hover:text-primary transition-colors cursor-pointer leading-snug">
-            {{ record.titulo }}
-          </h3>
-          <div class="flex items-center gap-6 text-sm text-text-muted flex-wrap">
-            <span class="flex items-center gap-1.5">
+          <h3 
+            class="font-display font-bold text-lg text-text-main group-hover:text-primary transition-colors cursor-pointer leading-snug"
+            v-html="highlightMatch(record.titulo_investigacion, debouncedSearch)"
+          ></h3>
+          <div class="flex items-center gap-6 text-sm text-text-muted flex-wrap mt-1">
+            <span class="flex items-center gap-1.5 capitalize">
               <span class="material-symbols-outlined text-base">person</span>
-              {{ record.autor }}
+              <span v-html="highlightMatch(record.authors?.toLowerCase() || 'Desconocido', debouncedSearch)"></span>
             </span>
-            <span class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-base">calendar_today</span>
-              Sustentada: {{ record.fecha }}
-            </span>
-            <span class="flex items-center gap-1.5" :class="record.estadoColor">
-              <span class="material-symbols-outlined text-base">{{ record.estadoIcon }}</span>
-              {{ record.estado }}
+            <span class="flex items-center gap-1.5 font-medium uppercase text-[11px] tracking-wider" :class="getStatusColor(record.status)">
+              <span class="material-symbols-outlined text-base">{{ getStatusIcon(record.status) }}</span>
+              {{ record.status || 'SIN ESTADO' }}
             </span>
           </div>
         </div>
@@ -209,34 +248,52 @@ const filtered = computed(() => {
       </div>
 
       <!-- Empty State -->
-      <div v-if="filtered.length === 0" class="py-24 text-center">
+      <div v-if="!isLoading && records.length === 0" class="py-24 text-center">
         <span class="material-symbols-outlined text-6xl text-border-color mb-4 block">search_off</span>
         <p class="font-display font-bold text-xl text-text-muted mb-2">Sin resultados</p>
-        <p class="text-text-muted text-sm">No se encontraron registros para los filtros aplicados.</p>
+        <p class="text-text-muted text-sm">No se encontraron registros en esta página o categoría.</p>
       </div>
 
       <!-- Count Footer -->
-      <div v-if="filtered.length > 0" class="bg-background-light border-t border-border-color p-4 text-center">
+      <div v-if="!isLoading && records.length > 0" class="bg-background-light border-t border-border-color p-4 text-center">
         <p class="text-xs text-text-muted font-medium italic">
-          Mostrando <strong class="text-text-main">{{ filtered.length }}</strong> de <strong class="text-text-main">{{ allRecords.length }}</strong> registros
-          <template v-if="activeTab !== 'Todos'"> en la categoría '<strong>{{ activeTab }}</strong>'</template>
+          Mostrando resultados de la página <strong class="text-text-main">{{ currentPage }}</strong>.
+          <template v-if="activeTab !== 'Todos'"> Categoría filtro: '<strong><span class="capitalize">{{ activeTab }}</span></strong>'</template>
         </p>
       </div>
     </div>
 
     <!-- Pagination -->
-    <div class="mt-8 flex justify-between items-center pb-8">
-      <div class="text-sm text-text-muted">Página 1 de 312</div>
+    <div class="mt-8 flex justify-between items-center pb-8" v-if="totalPages > 0">
+      <div class="text-sm text-text-muted">Página <span class="font-bold text-text-main">{{ currentPage }}</span> de <span class="font-bold text-text-main">{{ totalPages }}</span></div>
       <nav class="flex items-center gap-1">
-        <button class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30" disabled>
+        <button 
+          @click="prevPage" 
+          :disabled="currentPage === 1"
+          class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
-        <button class="w-10 h-10 flex items-center justify-center bg-primary text-white font-bold text-sm shadow-md">1</button>
-        <button class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors text-sm">2</button>
-        <button class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors text-sm">3</button>
-        <span class="px-2 text-text-muted">...</span>
-        <button class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors text-sm">312</button>
-        <button class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors">
+        
+        <template v-for="(page, idx) in visiblePages" :key="'page-' + idx">
+          <button
+            v-if="page !== '...'"
+            @click="currentPage = page"
+            class="w-10 h-10 flex items-center justify-center text-sm transition-colors border"
+            :class="currentPage === page
+              ? 'bg-primary border-primary text-white font-bold shadow-md'
+              : 'border-border-color text-text-muted hover:text-primary hover:border-primary'"
+          >
+            {{ page }}
+          </button>
+          <span v-else class="w-10 h-10 flex items-center justify-center text-text-muted font-bold tracking-widest px-1">...</span>
+        </template>
+        
+        <button 
+          @click="nextPage" 
+          :disabled="currentPage >= totalPages"
+          class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
       </nav>
@@ -255,20 +312,20 @@ const filtered = computed(() => {
         >
           <span class="material-symbols-outlined">close</span>
         </button>
-        <p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">{{ selectedAbstract.id }} — {{ selectedAbstract.linea }}</p>
-        <h3 class="font-display font-bold text-xl text-primary mb-4 leading-snug">{{ selectedAbstract.titulo }}</h3>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">{{ selectedAbstract.linea_investigacion }} <template v-if="selectedAbstract.sub_linea">— {{ selectedAbstract.sub_linea }}</template></p>
+        <h3 class="font-display font-bold text-xl text-primary mb-4 leading-snug">{{ selectedAbstract.titulo_investigacion }}</h3>
         <div class="flex items-center gap-4 text-sm text-text-muted mb-6 border-b border-border-color pb-4">
-          <span class="flex items-center gap-1.5">
+          <span class="flex items-center gap-1.5 capitalize">
             <span class="material-symbols-outlined text-base">person</span>
-            {{ selectedAbstract.autor }}
+            {{ selectedAbstract.authors?.toLowerCase() || 'Desconocido' }}
           </span>
-          <span class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-base">calendar_today</span>
-            {{ selectedAbstract.fecha }}
+          <span class="flex items-center gap-1.5 font-medium uppercase text-[11px] tracking-wider" :class="getStatusColor(selectedAbstract.status)">
+            <span class="material-symbols-outlined text-base">{{ getStatusIcon(selectedAbstract.status) }}</span>
+            {{ selectedAbstract.status || 'SIN ESTADO' }}
           </span>
         </div>
         <p class="text-text-muted text-sm leading-relaxed">
-          <em>Los datos del abstract se obtendrán desde el backend. Por ahora, este registro corresponde a la investigación registrada bajo el código <strong>{{ selectedAbstract.id }}</strong> con estado: <strong>{{ selectedAbstract.estado }}</strong>.</em>
+          <em>El equipo de desarrollo pronto habilitará el detalle completo del abstract y la metadata expandida para este título de la base de datos de UPAO.</em>
         </p>
       </div>
     </div>

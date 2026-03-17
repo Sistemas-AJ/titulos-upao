@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from backend.database.session import get_session
@@ -11,6 +12,7 @@ from backend.schemas.reference_title import (
     ReferenceTitleRead,
     ResearchLineCatalogItem,
     ResearchSublineCatalogItem,
+    normalize_reference_line,
 )
 from backend.services.reference_title_importer import parse_reference_titles_excel
 
@@ -114,7 +116,9 @@ def list_reference_titles(
 ):
     statement = select(ReferenceTitle)
     if linea_investigacion:
-        statement = statement.where(ReferenceTitle.linea_investigacion == linea_investigacion)
+        statement = statement.where(
+            ReferenceTitle.linea_investigacion == normalize_reference_line(linea_investigacion)
+        )
     if sub_linea:
         statement = statement.where(ReferenceTitle.sub_linea == sub_linea)
 
@@ -125,12 +129,25 @@ def list_reference_titles(
 @router.get("/paged", response_model=ReferenceTitlePage)
 def list_reference_titles_paged(
     linea_investigacion: str | None = Query(default=None),
+    q: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     session: Session = Depends(get_session),
 ):
     statement = select(ReferenceTitle)
     if linea_investigacion:
-        statement = statement.where(ReferenceTitle.linea_investigacion == linea_investigacion)
+        statement = statement.where(
+            ReferenceTitle.linea_investigacion == normalize_reference_line(linea_investigacion)
+        )
+    if q and q.strip():
+        search_term = f"%{q.strip()}%"
+        statement = statement.where(
+            or_(
+                ReferenceTitle.titulo_investigacion.ilike(search_term),
+                ReferenceTitle.sub_linea.ilike(search_term),
+                ReferenceTitle.authors.ilike(search_term),
+                ReferenceTitle.status.ilike(search_term),
+            )
+        )
 
     total = len(session.exec(statement).all())
     offset = (page - 1) * PAGE_SIZE

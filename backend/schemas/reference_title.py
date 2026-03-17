@@ -1,7 +1,15 @@
+import unicodedata
 from datetime import datetime
 from uuid import UUID
 
+from pydantic import field_validator
 from sqlmodel import SQLModel
+
+
+def normalize_reference_line(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.strip().lower())
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    return " ".join(ascii_text.split())
 
 
 class ReferenceTitleCreate(SQLModel):
@@ -10,6 +18,15 @@ class ReferenceTitleCreate(SQLModel):
     sub_linea: str
     authors: str = ""
     status: str = "APROVADO"
+
+    @field_validator("linea_investigacion", mode="before")
+    @classmethod
+    def normalize_linea_investigacion(cls, value: str) -> str:
+        if value is None:
+            return ""
+        if not isinstance(value, str):
+            value = str(value)
+        return normalize_reference_line(value)
 
 
 

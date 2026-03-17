@@ -52,3 +52,20 @@ export const getResearchCatalog = async () => {
     return []
   }
 }
+
+export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = null, q = null } = {}) => {
+  try {
+    const params = { page }
+    if (linea_investigacion) {
+      params.linea_investigacion = linea_investigacion
+    }
+    if (q && q.trim() !== '') {
+      params.q = q.trim()
+    }
+    const { data } = await apiClient.get('/api/reference-titles/paged', { params })
+    return data
+  } catch (error) {
+    console.error('Failed to fetch reference titles:', error)
+    return { items: [], total: 0, page: 1, size: 10, pages: 1 }
+  }
+}
