@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
 import { generateProposals } from '@/services/api'
+import * as XLSX from 'xlsx'
 
 const router = useRouter()
 const store = useWizardStore()
@@ -18,7 +19,7 @@ const canRetry = computed(() => store.step4.retryable)
 const savedTitles = computed(() => store.step4.selectedTitles)
 const savedTitleSet = computed(() => new Set(savedTitles.value.map((item) => item.t)))
 const hasSavedSelection = computed(() => savedTitles.value.length > 0)
-const saveSelectionLabel = computed(() => 'Guardar Selección')
+
 
 onMounted(() => {
   purgeExpiredSavedSelection()
@@ -132,57 +133,28 @@ const splitSpatialTemporal = (value) => {
 const exportFormat = () => {
   if (!hasSelection.value) return
 
+  // Format data for the worksheet
   const rows = selectedProposals.value.map((item, index) => {
     const { espacio, tiempo } = splitSpatialTemporal(item.s)
-    return `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${escapeHtml(item.t)}</td>
-        <td>${escapeHtml(item.v1)}</td>
-        <td>${escapeHtml(item.c)}</td>
-        <td>${escapeHtml(item.v2)}</td>
-        <td>${escapeHtml(item.u)}</td>
-        <td>${escapeHtml(espacio)}</td>
-        <td>${escapeHtml(tiempo)}</td>
-      </tr>
-    `
-  }).join('')
-
-  const html = `
-    <html>
-      <head>
-        <meta charset="UTF-8" />
-      </head>
-      <body>
-        <table border="1">
-          <tr>
-            <th>N</th>
-            <th>Titulo</th>
-            <th>Variable 1</th>
-            <th>Conector</th>
-            <th>Variable 2</th>
-            <th>Unidad de Investigacion</th>
-            <th>Espacio</th>
-            <th>Tiempo</th>
-          </tr>
-          ${rows}
-        </table>
-      </body>
-    </html>
-  `
-
-  const blob = new Blob([html], {
-    type: 'application/vnd.ms-excel;charset=utf-8;'
+    return {
+      'N°': index + 1,
+      'Título': item.t,
+      'Variable 1': item.v1,
+      'Conector': item.c,
+      'Variable 2': item.v2,
+      'Unidad de Investigación': item.u,
+      'Espacio': espacio,
+      'Tiempo': tiempo
+    }
   })
 
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'formato_oficial_titulos_upao.xls'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  // Create a new workbook and add the worksheet
+  const worksheet = XLSX.utils.json_to_sheet(rows)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Propuestas')
+
+  // Export the workbook
+  XLSX.writeFile(workbook, 'formato_oficial_titulos_upao.xlsx')
 }
 
 const goBack = () => {
@@ -244,14 +216,7 @@ const retryGeneration = async () => {
           <div class="h-1 w-20 bg-secondary mt-6 rounded-full"></div>
         </div>
         <div class="flex gap-3">
-          <button 
-            @click="saveSelection"
-            class="bg-surface border-2 border-primary text-primary px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
-            :class="hasSelection ? 'hover:bg-primary hover:text-white cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
-          >
-            <span class="material-symbols-outlined text-lg">save</span>
-            {{ saveSelectionLabel }}
-          </button>
+          
           
           <button 
             @click="exportFormat"

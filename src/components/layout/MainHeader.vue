@@ -1,4 +1,5 @@
 <script setup>
+import reglamentoPdf from '@/assets/reglamento.pdf'
 </script>
 
 <template>
@@ -10,9 +11,16 @@
       </p>
     </div>
     <div class="flex items-center gap-4">
-      <button class="text-xs font-bold text-primary hover:underline">Guía Metodológica</button>
-      <div class="h-4 w-[1px] bg-border-color"></div>
-      <button class="text-xs font-bold text-primary hover:underline">Soporte</button>
+      <a 
+        :href="reglamentoPdf" 
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-xs font-bold text-primary hover:underline hover:text-secondary transition-colors flex items-center gap-1.5"
+      >
+        <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+        Guía Metodológica
+      </a>
+      
     </div>
   </div>
 </template>
