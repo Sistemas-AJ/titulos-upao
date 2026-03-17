@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { AUTH_STORAGE_KEY } from '@/store/auth'
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:8000',
@@ -6,6 +7,33 @@ const apiClient = axios.create({
     'Content-Type': 'application/json'
   }
 })
+
+apiClient.interceptors.request.use((config) => {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed?.token) {
+        config.headers.Authorization = `Bearer ${parsed.token}`
+      }
+    }
+  } catch {}
+  return config
+})
+
+const extractError = (error, fallbackMessage) => {
+  const detail = error.response?.data?.detail
+
+  if (detail && typeof detail === 'object') {
+    const enrichedError = new Error(detail.message || fallbackMessage)
+    enrichedError.retryable = Boolean(detail.retryable)
+    enrichedError.reason = detail.reason || 'unknown'
+    enrichedError.retryAfterSeconds = detail.retry_after_seconds || 0
+    throw enrichedError
+  }
+
+  throw new Error(detail || fallbackMessage)
+}
 
 export const generateProposals = async (wizardState) => {
   const payload = {
@@ -28,19 +56,7 @@ export const generateProposals = async (wizardState) => {
     const { data } = await apiClient.post('/api/title-sessions', payload)
     return data
   } catch (error) {
-    const detail = error.response?.data?.detail
-
-    if (detail && typeof detail === 'object') {
-      const retryError = new Error(detail.message || 'No se pudieron generar las propuestas')
-      retryError.retryable = Boolean(detail.retryable)
-      retryError.reason = detail.reason || 'unknown'
-      throw retryError
-    }
-
-    const fallbackError = new Error(detail || 'No se pudieron generar las propuestas')
-    fallbackError.retryable = false
-    fallbackError.reason = 'unknown'
-    throw fallbackError
+    extractError(error, 'No se pudieron generar las propuestas')
   }
 }
 
@@ -50,5 +66,49 @@ export const getResearchCatalog = async () => {
     return data
   } catch {
     return []
+  }
+}
+
+export const registerUser = async (payload) => {
+  try {
+    const { data } = await apiClient.post('/api/users/register', payload)
+    return data
+  } catch (error) {
+    extractError(error, 'No se pudo crear la cuenta')
+  }
+}
+
+export const loginUser = async (payload) => {
+  try {
+    const { data } = await apiClient.post('/api/users/login', payload)
+    return data
+  } catch (error) {
+    extractError(error, 'No se pudo iniciar sesion')
+  }
+}
+
+export const saveTitles = async (payload) => {
+  try {
+    const { data } = await apiClient.post('/api/saved-titles', payload)
+    return data
+  } catch (error) {
+    extractError(error, 'No se pudo guardar la seleccion')
+  }
+}
+
+export const listSavedTitles = async () => {
+  try {
+    const { data } = await apiClient.get('/api/saved-titles')
+    return data
+  } catch (error) {
+    extractError(error, 'No se pudo cargar el historial')
+  }
+}
+
+export const deleteSavedTitle = async (savedTitleId) => {
+  try {
+    await apiClient.delete(`/api/saved-titles/${savedTitleId}`)
+  } catch (error) {
+    extractError(error, 'No se pudo eliminar el titulo guardado')
   }
 }

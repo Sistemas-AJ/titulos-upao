@@ -27,8 +27,7 @@ const defaultState = () => ({
     sessionId: '',
     status: 'idle',
     error: '',
-    retryable: false,
-    savedSelectionExpiresAt: null
+    retryable: false
   }
 })
 
@@ -91,12 +90,10 @@ export const useWizardStore = defineStore('wizard', {
     },
     setStep4Selected(titles) {
       this.step4.selectedTitles = titles
-      this.step4.savedSelectionExpiresAt = null
       this._persist()
     },
-    setSavedSelection({ titles, expiresAt }) {
+    setSavedSelection({ titles }) {
       this.step4.selectedTitles = titles
-      this.step4.savedSelectionExpiresAt = expiresAt
       this._persist()
     },
     startProposalGeneration() {
@@ -105,7 +102,6 @@ export const useWizardStore = defineStore('wizard', {
       this.step4.sessionId = ''
       this.step4.error = ''
       this.step4.retryable = false
-      this.step4.savedSelectionExpiresAt = null
       this.step4.status = 'loading'
       this._persist()
     },
@@ -114,7 +110,6 @@ export const useWizardStore = defineStore('wizard', {
       this.step4.sessionId = sessionId
       this.step4.error = ''
       this.step4.retryable = false
-      this.step4.savedSelectionExpiresAt = null
       this.step4.status = 'success'
       this._persist()
     },
@@ -123,7 +118,6 @@ export const useWizardStore = defineStore('wizard', {
       this.step4.selectedTitles = []
       this.step4.error = message
       this.step4.retryable = retryable
-      this.step4.savedSelectionExpiresAt = null
       this.step4.status = 'error'
       this._persist()
     },

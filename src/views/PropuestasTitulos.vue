@@ -2,14 +2,18 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
-import { generateProposals } from '@/services/api'
+import { generateProposals, saveTitles } from '@/services/api'
+import { useAuthStore } from '@/store/auth'
+import AuthDialog from '@/components/ui/AuthDialog.vue'
 
 const router = useRouter()
 const store = useWizardStore()
-const SAVED_SELECTIONS_KEY = 'upao_saved_title_selection'
-const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000
+const authStore = useAuthStore()
 
 const selectedIndices = ref([])
+const showAuthDialog = ref(false)
+const saveError = ref('')
+const isSaving = ref(false)
 const isLoading = computed(() => store.step4.status === 'loading')
 const proposals = computed(() => store.step4.proposals)
 const hasError = computed(() => store.step4.status === 'error')
@@ -18,14 +22,13 @@ const canRetry = computed(() => store.step4.retryable)
 const savedTitles = computed(() => store.step4.selectedTitles)
 const savedTitleSet = computed(() => new Set(savedTitles.value.map((item) => item.t)))
 const hasSavedSelection = computed(() => savedTitles.value.length > 0)
-const saveSelectionLabel = computed(() => 'Guardar Selección')
+const saveSelectionLabel = computed(() => (isSaving.value ? 'Guardando...' : 'Guardar Seleccion'))
 
 onMounted(() => {
-  purgeExpiredSavedSelection()
   if (!store.isStep3Complete) {
     router.push('/paso-3')
   }
-  restoreSavedSelection()
+  restoreSelection()
 })
 
 const toggleSelection = (index) => {
@@ -41,70 +44,49 @@ const hasSelection = computed(() => selectedIndices.value.length > 0)
 const selectedProposals = computed(() => selectedIndices.value.map((index) => proposals.value[index]).filter(Boolean))
 
 watch(proposals, () => {
-  restoreSavedSelection()
+  restoreSelection()
 })
 
-const purgeExpiredSavedSelection = () => {
-  try {
-    const saved = localStorage.getItem(SAVED_SELECTIONS_KEY)
-    if (!saved) return
-
-    const parsed = JSON.parse(saved)
-    if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
-      localStorage.removeItem(SAVED_SELECTIONS_KEY)
-    }
-  } catch {
-    localStorage.removeItem(SAVED_SELECTIONS_KEY)
-  }
-}
-
-const restoreSavedSelection = () => {
+const restoreSelection = () => {
   if (!proposals.value.length) return
+  const savedTitlesByName = new Set(savedTitles.value.map((item) => item.t))
+  selectedIndices.value = proposals.value
+    .map((item, index) => (savedTitlesByName.has(item.t) ? index : -1))
+    .filter((index) => index !== -1)
+}
+
+const performSaveSelection = async () => {
+  if (!hasSelection.value) return
+  saveError.value = ''
+  isSaving.value = true
 
   try {
-    const saved = localStorage.getItem(SAVED_SELECTIONS_KEY)
-    if (!saved) return
-
-    const parsed = JSON.parse(saved)
-    if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
-      localStorage.removeItem(SAVED_SELECTIONS_KEY)
-      return
-    }
-
-    const savedTitles = new Set((parsed.items || []).map((item) => item.t))
-    selectedIndices.value = proposals.value
-      .map((item, index) => savedTitles.has(item.t) ? index : -1)
-      .filter((index) => index !== -1)
-    store.setSavedSelection({
-      titles: (parsed.items || []),
-      expiresAt: parsed.expiresAt
+    const savedCollection = await saveTitles({
+      session_id: store.step4.sessionId || null,
+      linea_investigacion: store.step1.domain,
+      sub_linea: store.step1.subline,
+      items: selectedProposals.value
     })
-  } catch {
-    localStorage.removeItem(SAVED_SELECTIONS_KEY)
+
+    store.setSavedSelection({
+      titles: savedCollection.items
+    })
+    selectedIndices.value = []
+    alert('La seleccion se guardo en tu cuenta.')
+  } catch (error) {
+    saveError.value = error.message || 'No se pudo guardar la seleccion'
+  } finally {
+    isSaving.value = false
   }
 }
 
-const saveSelection = () => {
+const saveSelection = async () => {
   if (!hasSelection.value) return
-
-  const expiresAt = Date.now() + FIVE_DAYS_IN_MS
-  const payload = {
-    savedAt: Date.now(),
-    expiresAt,
-    items: selectedProposals.value,
-    sessionId: store.step4.sessionId,
-    linea: store.step1.domain,
-    sublinea: store.step1.subline
+  if (!authStore.isAuthenticated) {
+    showAuthDialog.value = true
+    return
   }
-
-  localStorage.setItem(SAVED_SELECTIONS_KEY, JSON.stringify(payload))
-
-  const expirationText = new Date(expiresAt).toLocaleDateString('es-PE')
-  alert(`La selección se guardó temporalmente en este dispositivo hasta el ${expirationText}.`)
-  store.setSavedSelection({
-    titles: selectedProposals.value,
-    expiresAt
-  })
+  await performSaveSelection()
 }
 
 const escapeHtml = (value) => String(value ?? '')
@@ -190,7 +172,6 @@ const goBack = () => {
 }
 
 const startNewTitleFlow = () => {
-  localStorage.removeItem(SAVED_SELECTIONS_KEY)
   store.resetWizard()
   router.push('/paso-1')
 }
@@ -211,6 +192,10 @@ const retryGeneration = async () => {
       retryable: Boolean(error.retryable)
     })
   }
+}
+
+const handleAuthenticated = async () => {
+  await performSaveSelection()
 }
 </script>
 
@@ -247,7 +232,7 @@ const retryGeneration = async () => {
           <button 
             @click="saveSelection"
             class="bg-surface border-2 border-primary text-primary px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
-            :class="hasSelection ? 'hover:bg-primary hover:text-white cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
+            :class="hasSelection && !isSaving ? 'hover:bg-primary hover:text-white cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
           >
             <span class="material-symbols-outlined text-lg">save</span>
             {{ saveSelectionLabel }}
@@ -268,8 +253,12 @@ const retryGeneration = async () => {
       <div class="mb-10 p-4 bg-amber-50 border-l-4 border-amber-400 flex items-center gap-3">
         <span class="material-symbols-outlined text-amber-600">info</span>
         <p class="text-sm text-amber-800 font-medium">
-          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor. La selección guardada se conserva solo en este dispositivo durante 5 días.
+          <strong class="font-bold">Nota:</strong> Los resultados de la IA son sugerencias y deben ser revisados académicamente por su asesor. Solo los titulos que guardes en tu cuenta apareceran luego en tu historial.
         </p>
+      </div>
+
+      <div v-if="saveError" class="mb-8 p-4 bg-red-50 border-l-4 border-red-400 text-sm text-red-800">
+        {{ saveError }}
       </div>
 
       <div v-if="hasError" class="mb-10 p-5 bg-red-50 border-l-4 border-red-400 flex items-start gap-3">
@@ -388,4 +377,10 @@ const retryGeneration = async () => {
     
     </div>
   </div>
+  <AuthDialog
+    v-model="showAuthDialog"
+    title="Inicia sesion para guardar titulos"
+    description="Los titulos recomendados por la IA son temporales. Guarda solo los que quieras conservar en tu historial."
+    @authenticated="handleAuthenticated"
+  />
 </template>

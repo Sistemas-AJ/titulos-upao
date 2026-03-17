@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 
 from backend.config import get_settings
 from backend.database.session import get_session
+from backend.dependencies.auth import get_current_user
 from backend.models.user import User
 from backend.schemas.user import AuthToken, LoginRequest, UserCreate, UserRead, UserRegister, UserUpdate
 from backend.services.auth import create_access_token, hash_password, verify_password
@@ -17,25 +18,42 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 @router.get("", response_model=list[UserRead])
-def list_users(session: Session = Depends(get_session)):
-    return session.exec(select(User).order_by(User.created_at.desc())).all()
+def list_users(current_user: User = Depends(get_current_user)):
+    return [current_user]
 
 
 @router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def create_user(payload: UserCreate, session: Session = Depends(get_session)):
-    existing_user = session.exec(select(User).where(User.email == payload.email)).first()
-    if existing_user:
-        raise HTTPException(status_code=409, detail="Ya existe un usuario con este correo")
-
-    user = User(full_name=payload.full_name, email=str(payload.email))
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    return user
+    raise HTTPException(
+        status_code=410,
+        detail="Este endpoint fue reemplazado. Usa /api/users/register para crear cuentas con contrasena.",
+    )
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def register_user(payload: UserRegister, session: Session = Depends(get_session)):
+def register_user(payload: UserRegister, request: Request, response: Response, session: Session = Depends(get_session)):
+    settings = get_settings()
+    client_ip = request.client.host if request.client else "unknown"
+    rate_limit = login_rate_limiter.check(
+        client_ip,
+        max_attempts=settings.login_rate_limit_per_minute,
+        window_seconds=60,
+        min_interval_seconds=settings.login_min_interval_seconds,
+    )
+    if not rate_limit.allowed:
+        response.headers["Retry-After"] = str(rate_limit.retry_after_seconds)
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "message": "Demasiados intentos de registro. Intenta nuevamente en breve.",
+                "reason": rate_limit.reason,
+                "retry_after_seconds": rate_limit.retry_after_seconds,
+            },
+        )
+
+    if not verify_recaptcha_token(payload.recaptcha_token, remote_ip=client_ip):
+        raise HTTPException(status_code=400, detail="No se pudo verificar reCAPTCHA")
+
     existing_user = session.exec(select(User).where(User.email == payload.email)).first()
     if existing_user:
         raise HTTPException(status_code=409, detail="Ya existe un usuario con este correo")
@@ -96,18 +114,22 @@ def login_user(payload: LoginRequest, request: Request, response: Response, sess
 
 
 @router.get("/{user_id}", response_model=UserRead)
-def get_user(user_id: UUID, session: Session = Depends(get_session)):
-    user = session.get(User, user_id)
-    if not user:
+def get_user(user_id: UUID, current_user: User = Depends(get_current_user)):
+    if current_user.id != user_id:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return user
+    return current_user
 
 
 @router.patch("/{user_id}", response_model=UserRead)
-def update_user(user_id: UUID, payload: UserUpdate, session: Session = Depends(get_session)):
-    user = session.get(User, user_id)
-    if not user:
+def update_user(
+    user_id: UUID,
+    payload: UserUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.id != user_id:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    user = current_user
 
     data = payload.model_dump(exclude_unset=True)
     if "email" in data:

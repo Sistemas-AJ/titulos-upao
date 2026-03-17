@@ -1,213 +1,245 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import AuthDialog from '@/components/ui/AuthDialog.vue'
+import { deleteSavedTitle, listSavedTitles } from '@/services/api'
+import { useAuthStore } from '@/store/auth'
 
-// Simulated backend data
-const allHistory = ref([
-  {
-    id: 1,
-    domain: 'Auditoría',
-    domainColor: 'bg-primary/10 text-primary',
-    date: 'Hace 2 horas (12 Oct, 2023)',
-    title: 'Impacto de la Auditoría Forense en la Detección de Fraude en Entidades Públicas del Perú: Un Estudio Comparativo 2020–2023',
-    variants: 5,
-    isFavorite: true
-  },
-  {
-    id: 2,
-    domain: 'Administración',
-    domainColor: 'bg-blue-50 text-blue-600',
-    date: 'Ayer, 16:45',
-    title: 'Estrategias de Resiliencia Organizacional en Pymes del Sector Manufacturero Post-Pandemia en la Región La Libertad',
-    variants: 3,
-    isFavorite: false
-  },
-  {
-    id: 3,
-    domain: 'Derecho',
-    domainColor: 'bg-amber-50 text-amber-600',
-    date: '8 Oct, 2023',
-    title: 'La Responsabilidad Civil del Estado en la Gestión de Conflictos Socioambientales: Análisis de la Jurisprudencia Reciente',
-    variants: 8,
-    isFavorite: false
-  },
-  {
-    id: 4,
-    domain: 'Finanzas',
-    domainColor: 'bg-emerald-50 text-emerald-700',
-    date: '5 Oct, 2023',
-    title: 'Rentabilidad del Portafolio de Inversiones y su relación con la Gestión del Riesgo en las AFP Peruanas, 2022',
-    variants: 6,
-    isFavorite: false
-  },
-  {
-    id: 5,
-    domain: 'Tributación',
-    domainColor: 'bg-purple-50 text-purple-700',
-    date: '1 Oct, 2023',
-    title: 'Planeamiento tributario y la reducción de contingencias fiscales en MYPES del sector comercio en Trujillo, 2023',
-    variants: 4,
-    isFavorite: true
-  },
-])
-
+const authStore = useAuthStore()
+const showAuthDialog = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
 const searchQuery = ref('')
-const currentPage = ref(1)
-const perPage = 10
+const savedCollections = ref([])
 
-const filtered = computed(() =>
-  allHistory.value.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    item.domain.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-)
+const filtered = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return savedCollections.value
 
-const deleteItem = (id) => {
-  const idx = allHistory.value.findIndex(i => i.id === id)
-  if (idx !== -1) allHistory.value.splice(idx, 1)
-}
-
-const viewItem = (item) => {
-  alert(`Abriendo: ${item.title}`)
-}
-
-const copyItem = (item) => {
-  navigator.clipboard.writeText(item.title).then(() => {
-    alert('Título copiado al portapapeles')
+  return savedCollections.value.filter((collection) => {
+    return (
+      collection.linea_investigacion.toLowerCase().includes(query) ||
+      collection.sub_linea.toLowerCase().includes(query) ||
+      collection.items.some((item) => item.t.toLowerCase().includes(query))
+    )
   })
+})
+
+const loadHistory = async () => {
+  if (!authStore.isAuthenticated) return
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    savedCollections.value = await listSavedTitles()
+  } catch (error) {
+    errorMessage.value = error.message || 'No se pudo cargar tu historial'
+  } finally {
+    isLoading.value = false
+  }
 }
 
-const downloadItem = (item) => {
-  alert(`Descargando: ${item.title}`)
+onMounted(loadHistory)
+
+const formatDate = (value) => new Date(value).toLocaleString('es-PE', {
+  dateStyle: 'medium',
+  timeStyle: 'short'
+})
+
+const copyItem = async (item) => {
+  await navigator.clipboard.writeText(item.t)
+  alert('Titulo copiado al portapapeles')
+}
+
+const downloadCollection = (collection) => {
+  const rows = collection.items.map((item, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${item.t}</td>
+      <td>${item.v1}</td>
+      <td>${item.c}</td>
+      <td>${item.v2}</td>
+      <td>${item.u}</td>
+      <td>${item.s}</td>
+    </tr>
+  `).join('')
+
+  const html = `
+    <html>
+      <head><meta charset="UTF-8" /></head>
+      <body>
+        <table border="1">
+          <tr>
+            <th>N</th>
+            <th>Titulo</th>
+            <th>Variable 1</th>
+            <th>Conector</th>
+            <th>Variable 2</th>
+            <th>Unidad</th>
+            <th>Espacio / Tiempo</th>
+          </tr>
+          ${rows}
+        </table>
+      </body>
+    </html>
+  `
+
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `titulos_guardados_${collection.id}.xls`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+const removeCollection = async (collectionId) => {
+  if (!window.confirm('Se eliminara este bloque de titulos guardados.')) return
+  try {
+    await deleteSavedTitle(collectionId)
+    savedCollections.value = savedCollections.value.filter((item) => item.id !== collectionId)
+  } catch (error) {
+    errorMessage.value = error.message || 'No se pudo eliminar el registro'
+  }
+}
+
+const handleAuthenticated = async () => {
+  await loadHistory()
 }
 </script>
 
 <template>
   <div class="max-w-[1100px] w-full mx-auto py-12 px-12 flex-1 flex flex-col">
-
-    <!-- Page Intro -->
     <div class="mb-10">
-      <h2 class="font-display font-bold text-4xl text-primary leading-tight mb-3">Registro de Consultas</h2>
+      <h2 class="font-display font-bold text-4xl text-primary leading-tight mb-3">Titulos Guardados</h2>
       <p class="text-text-muted text-lg max-w-2xl leading-relaxed">
-        Administra y revisa las propuestas de títulos generadas por el sistema de IA para tus diversas líneas de investigación académica.
+        Aqui solo aparecen los titulos que guardaste manualmente desde las recomendaciones generadas.
       </p>
       <div class="h-1 w-20 bg-secondary mt-6 rounded-full"></div>
     </div>
 
-    <!-- Filters & Search -->
-    <div class="flex flex-col md:flex-row gap-4 mb-8">
-      <div class="flex-1 relative group">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
-        <input 
-          v-model="searchQuery"
-          class="w-full pl-10 pr-4 py-3 bg-surface border border-border-color focus:ring-1 focus:ring-primary/20 focus:border-primary text-sm transition-all outline-none placeholder:text-text-muted" 
-          placeholder="Buscar por título, palabra clave o línea..." 
-          type="text"
-        />
-      </div>
-      <div class="flex gap-3">
-        <button class="flex items-center gap-2 px-4 py-3 bg-surface border border-border-color text-sm font-semibold hover:bg-background-light transition-colors">
-          <span class="material-symbols-outlined text-lg">filter_list</span>
-          Líneas
-          <span class="material-symbols-outlined text-lg">expand_more</span>
-        </button>
-        <button class="flex items-center gap-2 px-4 py-3 bg-surface border border-border-color text-sm font-semibold hover:bg-background-light transition-colors">
-          <span class="material-symbols-outlined text-lg">calendar_month</span>
-          Fecha
-          <span class="material-symbols-outlined text-lg">expand_more</span>
-        </button>
-
-      </div>
-    </div>
-
-    <!-- History List -->
-    <div class="flex flex-col gap-4 flex-1">
-      <div 
-        v-for="item in filtered"
-        :key="item.id"
-        class="bg-surface border border-border-color p-6 hover:border-primary/40 hover:shadow-md transition-all group"
+    <div v-if="!authStore.isAuthenticated" class="border border-border-color bg-surface p-10 text-center">
+      <span class="material-symbols-outlined text-5xl text-primary mb-4 block">lock</span>
+      <h3 class="font-display text-2xl font-bold text-primary mb-3">Inicia sesion para ver tu historial</h3>
+      <p class="text-sm text-text-muted max-w-xl mx-auto mb-6">
+        El historial esta ligado a tu usuario. Las propuestas de IA no se conservan automaticamente; solo se listan las que decidiste guardar.
+      </p>
+      <button
+        class="px-6 py-3 bg-primary text-white font-bold uppercase tracking-[0.18em] text-xs hover:brightness-110 transition-all"
+        @click="showAuthDialog = true"
       >
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          
-          <div class="flex-1">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-sm" :class="item.domainColor">{{ item.domain }}</span>
-              <span class="text-text-muted text-xs flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">schedule</span>
-                {{ item.date }}
-              </span>
-            </div>
-            <h4 class="font-display font-bold text-[17px] text-text-main mb-3 group-hover:text-primary transition-colors leading-snug">{{ item.title }}</h4>
-            <div class="flex gap-4">
-              <p class="text-sm text-text-muted flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-base">description</span>
-                {{ item.variants }} variantes generadas
-              </p>
-              <p v-if="item.isFavorite" class="text-sm text-text-muted flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-base text-secondary">star</span>
-                Favorito
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1">
-            <button @click="viewItem(item)" class="p-2.5 text-text-muted hover:text-primary transition-colors hover:bg-primary/5" title="Ver">
-              <span class="material-symbols-outlined">visibility</span>
-            </button>
-            <button @click="copyItem(item)" class="p-2.5 text-text-muted hover:text-primary transition-colors hover:bg-primary/5" title="Copiar">
-              <span class="material-symbols-outlined">content_copy</span>
-            </button>
-            <button @click="downloadItem(item)" class="p-2.5 text-text-muted hover:text-primary transition-colors hover:bg-primary/5" title="Descargar">
-              <span class="material-symbols-outlined">download</span>
-            </button>
-            <div class="w-[1px] h-8 bg-border-color mx-2"></div>
-            <button @click="deleteItem(item.id)" class="p-2.5 text-text-muted hover:text-red-500 transition-colors hover:bg-red-50" title="Eliminar">
-              <span class="material-symbols-outlined">delete</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="filtered.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
-        <span class="material-symbols-outlined text-6xl text-border-color mb-4">manage_search</span>
-        <p class="font-display font-bold text-xl text-text-muted mb-2">Sin resultados</p>
-        <p class="text-text-muted text-sm">No se encontraron consultas que coincidan con tu búsqueda.</p>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="filtered.length > 0" class="mt-8 flex items-center justify-between pt-6 border-t border-border-color">
-        <p class="text-sm text-text-muted font-medium">
-          Mostrando <strong class="text-text-main">{{ filtered.length }}</strong> de <strong class="text-text-main">{{ allHistory.length }}</strong> consultas
-        </p>
-        <div class="flex gap-2">
-          <button class="w-10 h-10 flex items-center justify-center border border-border-color bg-surface text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed" disabled>
-            <span class="material-symbols-outlined">chevron_left</span>
-          </button>
-          <button class="w-10 h-10 flex items-center justify-center bg-primary text-white font-bold text-sm shadow-md">1</button>
-          <button class="w-10 h-10 flex items-center justify-center border border-border-color bg-surface text-text-muted hover:border-primary hover:text-primary transition-colors">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Summary Card -->
-    <div class="mt-12 bg-primary/5 p-8 flex flex-col md:flex-row items-center justify-between border border-primary/10 gap-6">
-      <div class="flex items-center gap-6">
-        <div class="w-14 h-14 bg-surface flex items-center justify-center text-primary border border-primary/10">
-          <span class="material-symbols-outlined text-2xl">insights</span>
-        </div>
-        <div>
-          <h5 class="font-display text-lg font-bold text-text-main mb-1">Resumen Mensual</h5>
-          <p class="text-sm text-text-muted">
-            Has generado <strong class="text-primary">24 títulos</strong> este mes. Te quedan <strong class="text-primary">76 créditos</strong> de investigación.
-          </p>
-        </div>
-      </div>
-      <button class="px-6 py-2.5 border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all">
-        Ver Estadísticas
+        Iniciar sesion o crear cuenta
       </button>
     </div>
 
+    <template v-else>
+      <div class="flex flex-col md:flex-row gap-4 mb-8">
+        <div class="flex-1 relative group">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
+          <input
+            v-model="searchQuery"
+            class="w-full pl-10 pr-4 py-3 bg-surface border border-border-color focus:ring-1 focus:ring-primary/20 focus:border-primary text-sm transition-all outline-none placeholder:text-text-muted"
+            placeholder="Buscar por titulo, linea o sublinea"
+            type="text"
+          />
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="px-4 py-3 bg-primary/5 border border-primary/10 text-sm text-primary font-semibold">
+            {{ filtered.length }} registros
+          </div>
+          <button
+            class="px-4 py-3 border border-border-color text-sm font-semibold hover:border-primary hover:text-primary transition-colors"
+            @click="authStore.clearSession()"
+          >
+            Cerrar sesion
+          </button>
+        </div>
+      </div>
+
+      <div v-if="errorMessage" class="mb-6 p-4 bg-red-50 border-l-4 border-red-400 text-sm text-red-800">
+        {{ errorMessage }}
+      </div>
+
+      <div v-if="isLoading" class="flex-1 flex items-center justify-center py-20">
+        <p class="text-sm text-text-muted">Cargando historial...</p>
+      </div>
+
+      <div v-else class="space-y-5">
+        <div
+          v-for="collection in filtered"
+          :key="collection.id"
+          class="bg-surface border border-border-color p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-sm bg-primary/10 text-primary">
+                  {{ collection.linea_investigacion }}
+                </span>
+                <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-sm bg-secondary/10 text-secondary">
+                  {{ collection.sub_linea }}
+                </span>
+                <span class="text-text-muted text-xs flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">schedule</span>
+                  {{ formatDate(collection.created_at) }}
+                </span>
+              </div>
+
+              <div class="space-y-3">
+                <article
+                  v-for="item in collection.items"
+                  :key="item.id"
+                  class="border border-border-color bg-background-light px-4 py-4"
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 class="font-display font-bold text-[17px] text-text-main leading-snug">{{ item.t }}</h4>
+                      <p class="mt-2 text-sm text-text-muted">
+                        {{ item.v1 }} {{ item.c }} {{ item.v2 }} · {{ item.u }} · {{ item.s }}
+                      </p>
+                    </div>
+                    <button class="p-2 text-text-muted hover:text-primary transition-colors" @click="copyItem(item)">
+                      <span class="material-symbols-outlined">content_copy</span>
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                class="p-2.5 text-text-muted hover:text-primary transition-colors hover:bg-primary/5"
+                title="Descargar"
+                @click="downloadCollection(collection)"
+              >
+                <span class="material-symbols-outlined">download</span>
+              </button>
+              <button
+                class="p-2.5 text-text-muted hover:text-red-500 transition-colors hover:bg-red-50"
+                title="Eliminar"
+                @click="removeCollection(collection.id)"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="!filtered.length" class="flex flex-col items-center justify-center py-24 text-center border border-dashed border-border-color bg-background-light">
+          <span class="material-symbols-outlined text-6xl text-border-color mb-4">bookmarks</span>
+          <p class="font-display font-bold text-xl text-text-muted mb-2">Aun no tienes titulos guardados</p>
+          <p class="text-text-muted text-sm max-w-md">
+            Genera propuestas con IA, elige las que realmente quieras conservar y guardalas con tu cuenta.
+          </p>
+        </div>
+      </div>
+    </template>
   </div>
+
+  <AuthDialog
+    v-model="showAuthDialog"
+    title="Accede a tu historial"
+    description="Necesitas autenticarte para ver y conservar los titulos guardados en tu cuenta."
+    @authenticated="handleAuthenticated"
+  />
 </template>

@@ -14,6 +14,7 @@ class UserRegister(SQLModel):
     full_name: str
     email: EmailStr
     password: str
+    recaptcha_token: str | None = None
 
 
 class UserRead(SQLModel):
