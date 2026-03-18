@@ -84,6 +84,7 @@ def create_title_session(
         session,
         linea_investigacion=payload.linea_investigacion,
         sub_linea=payload.sub_linea,
+        nivel_investigacion=payload.nivel,
     )
 
     try:

@@ -53,7 +53,7 @@ export const getResearchCatalog = async () => {
   }
 }
 
-export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = null, q = null } = {}) => {
+export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = null, q = null, anio = null } = {}) => {
   try {
     const params = { page }
     if (linea_investigacion) {
@@ -61,6 +61,9 @@ export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = 
     }
     if (q && q.trim() !== '') {
       params.q = q.trim()
+    }
+    if (anio) {
+      params.anio = anio
     }
     const { data } = await apiClient.get('/reference-titles/paged', { params })
     return data

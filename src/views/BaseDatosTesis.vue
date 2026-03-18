@@ -8,6 +8,9 @@ import { getReferenceTitlesPaged } from '@/services/api'
 const tabs = ['Todos', 'auditoria', 'contabilidad', 'costos', 'finanzas', 'tributacion']
 const activeTab = ref('Todos')
 
+const years = Array.from({ length: 2026 - 2012 + 1 }, (_, i) => 2026 - i) // 2026 to 2012
+const selectedYear = ref('')
+
 const records = ref([])
 const isLoading = ref(false)
 const searchQuery = ref('')
@@ -29,7 +32,8 @@ const fetchRecords = async () => {
     const response = await getReferenceTitlesPaged({
       page: currentPage.value,
       linea_investigacion: linea,
-      q: debouncedSearch.value
+      q: debouncedSearch.value,
+      anio: selectedYear.value || undefined
     })
     
     // Schema mapping based on real JSON structure
@@ -52,6 +56,11 @@ const fetchRecords = async () => {
 // Watchers
 watch(activeTab, () => {
   currentPage.value = 1 // Reset to page 1 on tab change
+  fetchRecords()
+})
+
+watch(selectedYear, () => {
+  currentPage.value = 1 // Reset to page 1 on year change
   fetchRecords()
 })
 
@@ -180,10 +189,21 @@ const visiblePages = computed(() => {
             type="text"
           />
         </div>
-        <button class="px-6 py-4 bg-primary text-white font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg">
-          <span class="material-symbols-outlined">filter_list</span>
-          Filtros Avanzados
-        </button>
+        <div class="relative group w-48 shrink-0">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
+            <span class="material-symbols-outlined">calendar_today</span>
+          </div>
+          <select
+            v-model="selectedYear"
+            class="w-full pl-12 pr-10 py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base appearance-none cursor-pointer"
+          >
+            <option value="">Cualquier año</option>
+            <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-text-muted">
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+        </div>
       </div>
 
       <!-- Category Tabs -->
@@ -229,6 +249,14 @@ const visiblePages = computed(() => {
             <span class="flex items-center gap-1.5 capitalize">
               <span class="material-symbols-outlined text-base">person</span>
               <span v-html="highlightMatch(record.authors?.toLowerCase() || 'Desconocido', debouncedSearch)"></span>
+            </span>
+            <span class="flex items-center gap-1.5 font-medium" v-if="record.anio">
+              <span class="material-symbols-outlined text-base">calendar_today</span>
+              {{ record.anio }}
+            </span>
+            <span class="flex items-center gap-1.5 font-medium capitalize" v-if="record.nivel_investigacion">
+              <span class="material-symbols-outlined text-base">science</span>
+              {{ record.nivel_investigacion }}
             </span>
             <span class="flex items-center gap-1.5 font-medium uppercase text-[11px] tracking-wider" :class="getStatusColor(record.status)">
               <span class="material-symbols-outlined text-base">{{ getStatusIcon(record.status) }}</span>
@@ -314,10 +342,18 @@ const visiblePages = computed(() => {
         </button>
         <p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">{{ selectedAbstract.linea_investigacion }} <template v-if="selectedAbstract.sub_linea">— {{ selectedAbstract.sub_linea }}</template></p>
         <h3 class="font-display font-bold text-xl text-primary mb-4 leading-snug">{{ selectedAbstract.titulo_investigacion }}</h3>
-        <div class="flex items-center gap-4 text-sm text-text-muted mb-6 border-b border-border-color pb-4">
+        <div class="flex items-center gap-4 text-sm text-text-muted mb-6 border-b border-border-color pb-4 flex-wrap">
           <span class="flex items-center gap-1.5 capitalize">
             <span class="material-symbols-outlined text-base">person</span>
             {{ selectedAbstract.authors?.toLowerCase() || 'Desconocido' }}
+          </span>
+          <span class="flex items-center gap-1.5 font-medium" v-if="selectedAbstract.anio">
+            <span class="material-symbols-outlined text-base">calendar_today</span>
+            {{ selectedAbstract.anio }}
+          </span>
+          <span class="flex items-center gap-1.5 font-medium capitalize" v-if="selectedAbstract.nivel_investigacion">
+            <span class="material-symbols-outlined text-base">science</span>
+            {{ selectedAbstract.nivel_investigacion }}
           </span>
           <span class="flex items-center gap-1.5 font-medium uppercase text-[11px] tracking-wider" :class="getStatusColor(selectedAbstract.status)">
             <span class="material-symbols-outlined text-base">{{ getStatusIcon(selectedAbstract.status) }}</span>

@@ -21,7 +21,7 @@ onMounted(() => {
 const levels = [
   { value: 'correlacional', title: 'Correlacional', subtitle: 'Relación entre variables' },
   { value: 'explicativo', title: 'Explicativo / Causal', subtitle: 'Causa y efecto' },
-  { value: 'aplicativo', title: 'Aplicativo / Propuesta', subtitle: 'Solución a problemas' }
+  { value: 'propuesta', title: 'Aplicativo / Propuesta', subtitle: 'Solución a problemas' }
 ]
 
 const levelDetails = {
@@ -53,9 +53,9 @@ const levelDetails = {
       '"Impacto de la auditoría continua en la reducción de fraudes corporativos en el sector bancario."'
     ]
   },
-  aplicativo: {
+  propuesta: {
     number: '03',
-    title: 'Base Metodológica: Aplicativo',
+    title: 'Base Metodológica: Aplicativo/Propuesta',
     description: 'Investigación orientada a resolver problemas prácticos con finalidades de desarrollo metodológico. Busca implementar mejoras a un proceso específico.',
     requirements: [
       'Diagnóstico inicial del problema en una entidad real.',

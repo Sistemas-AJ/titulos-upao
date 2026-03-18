@@ -71,9 +71,9 @@ const isToolActive = (path) => route.path === path
   <aside class="w-[280px] flex-shrink-0 border-r border-border-color bg-surface flex flex-col h-full z-20 shadow-md" style="background-color: #0056A3;">
     
     <!-- Brand Header -->
-    <div class="p-8 border-b border-white/10" style="background-color: #0056A3;">
-      <h1 class="font-display font-bold text-xl text-white">UPAO Editorial</h1>
-      <p class="text-[10px] text-white/70 mt-1 uppercase tracking-widest font-bold">Dashboard de Investigación</p>
+    <div class="p-8 border-b border-white/20" style="background-color: #0056A3;">
+      <h1 class="font-display font-bold text-xl text-white">UPAO Ciencias Economicas</h1>
+      <p class="text-[10px] text-white/70 mt-1 uppercase tracking-widest font-bold">Explorador de Tesis</p>
     </div>
     
     <div class="flex flex-col flex-1 overflow-y-auto">

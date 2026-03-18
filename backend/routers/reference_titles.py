@@ -138,6 +138,7 @@ def list_reference_titles(
 def list_reference_titles_paged(
     linea_investigacion: str | None = Query(default=None),
     q: str | None = Query(default=None),
+    anio: int | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     session: Session = Depends(get_session),
 ):
@@ -156,6 +157,8 @@ def list_reference_titles_paged(
                 ReferenceTitle.status.ilike(search_term),
             )
         )
+    if anio is not None:
+        statement = statement.where(ReferenceTitle.anio == anio)
 
     total = len(session.exec(statement).all())
     offset = (page - 1) * PAGE_SIZE
