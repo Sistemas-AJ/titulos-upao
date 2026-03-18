@@ -34,6 +34,8 @@ def to_reference_title_read(item: ReferenceTitle) -> ReferenceTitleRead:
         created_at=item.created_at,
         authors=item.authors,
         status=item.status,
+        anio=item.anio,
+        nivel_investigacion=item.nivel_investigacion,
     )
 
 
@@ -44,6 +46,8 @@ def to_reference_title_list_item(item: ReferenceTitle) -> ReferenceTitleListItem
         sub_linea=item.sub_linea,
         authors=item.authors,
         status=item.status,
+        anio=item.anio,
+        nivel_investigacion=item.nivel_investigacion,
     )
 
 
@@ -66,7 +70,7 @@ async def import_reference_titles(
         raise HTTPException(status_code=400, detail="No se pudo procesar el archivo Excel") from exc
 
     created: list[ReferenceTitle] = []
-    duplicates: list[ReferenceTitle] = []
+    updated: list[ReferenceTitle] = []
 
     for item in items:
         existing = session.exec(
@@ -78,7 +82,11 @@ async def import_reference_titles(
         ).first()
 
         if existing:
-            duplicates.append(existing)
+            existing.anio = item.anio
+            existing.nivel_investigacion = item.nivel_investigacion
+            session.add(existing)
+            session.flush()
+            updated.append(existing)
             continue
 
         reference_title = ReferenceTitle(**item.model_dump())
@@ -90,7 +98,7 @@ async def import_reference_titles(
 
     return ReferenceTitleImportResponse(
         created=[to_reference_title_read(item) for item in created],
-        duplicates=[to_reference_title_read(item) for item in duplicates],
+        updated=[to_reference_title_read(item) for item in updated],
         total_received=len(items),
     )
 

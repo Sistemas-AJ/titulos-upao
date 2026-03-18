@@ -26,4 +26,6 @@ class ReferenceTitle(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utc_now, nullable=False)
     authors: str = Field(default="", max_length=255)
     status: str = Field(default="APROVADO", max_length=50, nullable=False)
+    anio: int 
+    nivel_investigacion: str = Field(max_length=100)
 

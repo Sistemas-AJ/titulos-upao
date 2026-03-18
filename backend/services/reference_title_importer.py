@@ -36,6 +36,14 @@ EXPECTED_HEADERS = {
         "status",
         "estado",
     },
+    "anio": {
+        "anio",
+        "año",
+    },
+    "nivel_investigacion": {
+        "nivel_investigacion",
+        "nivel investigacion", 
+    },
 }
 
 REQUIRED_FIELDS = {"titulo_investigacion", "linea_investigacion", "sub_linea"}
@@ -83,9 +91,17 @@ def parse_reference_titles_excel(file_bytes: bytes) -> list[ReferenceTitleCreate
         sub_linea = str(row[column_map["sub_linea"]]).strip() if row[column_map["sub_linea"]] is not None else ""
         authors_index = column_map.get("authors")
         status_index = column_map.get("status")
+        anio_index = column_map.get("anio")
+        nivel_investigacion_index = column_map.get("nivel_investigacion")
 
         authors = str(row[authors_index]).strip() if authors_index is not None and row[authors_index] is not None else ""
         status = str(row[status_index]).strip() if status_index is not None and row[status_index] is not None else "APROVADO"
+        anio = int(row[anio_index]) if anio_index is not None and row[anio_index] is not None else 0
+        nivel_investigacion = (
+            str(row[nivel_investigacion_index]).strip()
+            if nivel_investigacion_index is not None and row[nivel_investigacion_index] is not None
+            else ""
+        )
 
 
         if not titulo and not linea and not sub_linea:
@@ -101,6 +117,8 @@ def parse_reference_titles_excel(file_bytes: bytes) -> list[ReferenceTitleCreate
                 sub_linea=sub_linea,
                 authors=authors,
                 status=status or "APROVADO",
+                anio=anio,
+                nivel_investigacion=nivel_investigacion,
             )
         )
 

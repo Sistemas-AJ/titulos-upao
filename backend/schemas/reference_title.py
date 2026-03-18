@@ -18,6 +18,8 @@ class ReferenceTitleCreate(SQLModel):
     sub_linea: str
     authors: str = ""
     status: str = "APROVADO"
+    anio: int
+    nivel_investigacion: str
 
     @field_validator("linea_investigacion", mode="before")
     @classmethod
@@ -38,6 +40,8 @@ class ReferenceTitleRead(SQLModel):
     created_at: datetime
     authors: str
     status: str
+    anio: int
+    nivel_investigacion: str
 
 
 class ReferenceTitleListItem(SQLModel):
@@ -46,6 +50,8 @@ class ReferenceTitleListItem(SQLModel):
     sub_linea: str
     authors: str
     status: str
+    anio: int
+    nivel_investigacion: str
 
 
 class ReferenceTitlePage(SQLModel):
@@ -58,7 +64,7 @@ class ReferenceTitlePage(SQLModel):
 
 class ReferenceTitleImportResponse(SQLModel):
     created: list[ReferenceTitleRead]
-    duplicates: list[ReferenceTitleRead]
+    updated: list[ReferenceTitleRead]
     total_received: int
 
 
