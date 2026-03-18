@@ -162,8 +162,8 @@ def list_reference_titles_paged(
     items = session.exec(
         statement
         .order_by(
-            ReferenceTitle.linea_investigacion.asc(),
-            ReferenceTitle.sub_linea.asc(),
+            ReferenceTitle.anio.desc(),
+            ReferenceTitle.created_at.desc(),
             ReferenceTitle.titulo_investigacion.asc(),
         )
         .offset(offset)
