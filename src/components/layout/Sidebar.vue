@@ -72,7 +72,7 @@ const isToolActive = (path) => route.path === path
     
     <!-- Brand Header -->
     <div class="p-8 border-b border-white/20" style="background-color: #0056A3;">
-      <h1 class="font-display font-bold text-xl text-white">UPAO Ciencias Economicas</h1>
+      <h1 class="font-display font-bold text-xl text-white">Ciencias Economicas</h1>
       <p class="text-[10px] text-white/70 mt-1 uppercase tracking-widest font-bold">Explorador de Tesis</p>
     </div>
     

@@ -95,7 +95,7 @@ const goNext = () => {
     <div class="mb-10 flex items-center gap-4 p-5 bg-primary/5 border-l-4 border-primary">
       <span class="material-symbols-outlined text-primary">info</span>
       <p class="text-sm text-text-main">
-        <strong class="font-bold">Nota Académica:</strong> La IA proporciona sugerencias basadas en patrones de investigación. Valide siempre la elección con su director de tesis según la normativa vigente de la UPAO.
+        <strong class="font-bold">Nota Académica:</strong> La IA proporciona sugerencias basadas en patrones de investigación. Valide siempre la elección con su asesor de tesis según la normativa vigente.
       </p>
     </div>
 
@@ -151,7 +151,7 @@ const goNext = () => {
 
             <div class="mt-auto">
               <h4 class="text-xs font-black uppercase tracking-[0.25em] text-accent mb-8 pb-2 border-b-2 border-accent/20 inline-block">
-                Ejemplos de Títulos UPAO
+                Ejemplos de Títulos
               </h4>
               <div class="space-y-6">
                 <div v-for="(example, idx) in currentDetails.examples" :key="idx" class="pl-6 border-l-4 border-primary">

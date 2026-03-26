@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     base_host: str = Field(alias="BASE_HOST")
     base_port: int = Field(alias="BASE_PORT")
     model_ia: str = Field(alias="MODEL_IA")
-    app_name: str = "Titulos UPAO API"
+    app_name: str = "Titulos API"
     session_ttl_hours: int = 24
     cors_origins: list[str] = [
         "http://localhost:5173",

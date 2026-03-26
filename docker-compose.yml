@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: ${BASE_NAME}
       POSTGRES_USER: ${BASE_USER}
       POSTGRES_PASSWORD: ${BASE_PASSWORD}
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -30,7 +28,7 @@ services:
       BASE_PORT: 5432
     command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
     ports:
-      - "8000:8000"
+      - "0.0.0.0:8000:8000"
     volumes:
       - ./backend:/app/backend
     depends_on:
@@ -44,18 +42,22 @@ services:
     container_name: titulos-upao-cleanup-cron
     env_file:
       - backend/.env
-    environment:
-      CLEANUP_URL: http://backend:8000/api/title-sessions/expired
     command:
       - /bin/sh
       - -c
       - |
-        echo "0 0 * * * root python /app/backend/scripts/delete_expired_sessions.py >> /proc/1/fd/1 2>> /proc/1/fd/2" > /etc/cron.d/delete-expired
+        # Instalamos curl si no está en la imagen
+        apt-get update && apt-get install -y curl
+        
+        # Creamos el archivo cron (sin la palabra 'root' si usamos crontab)
+        echo "0 0 * * * curl -X DELETE http://backend:8000/api/title-sessions/expired >> /proc/1/fd/1 2>> /proc/1/fd/2" > /etc/cron.d/delete-expired
+        
+        # Permisos correctos
         chmod 0644 /etc/cron.d/delete-expired
+        
+        # Aplicar el cron y correr en primer plano
         crontab /etc/cron.d/delete-expired
         cron -f
-    volumes:
-      - ./backend:/app/backend
     depends_on:
       backend:
         condition: service_started

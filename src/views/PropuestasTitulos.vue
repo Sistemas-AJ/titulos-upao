@@ -154,7 +154,7 @@ const exportFormat = () => {
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Propuestas')
 
   // Export the workbook
-  XLSX.writeFile(workbook, 'formato_oficial_titulos_upao.xlsx')
+  XLSX.writeFile(workbook, 'formato_oficial_titulos.xlsx')
 }
 
 const goBack = () => {
@@ -212,7 +212,7 @@ const retryGeneration = async () => {
       <header class="mb-10 flex justify-between items-end">
         <div>
           <h2 class="font-display text-4xl font-bold text-primary leading-tight mb-3">Propuestas de Títulos</h2>
-          <p class="text-lg text-text-muted">Seleccione las opciones que mejor se adapten a su objetivo de estudio.</p>
+          <p class="text-lg text-text-muted">Para exportar a un documento de Excel, seleccione las tarjetas de titulos que mejor se adapten a su objetivo de estudio.</p>
           <div class="h-1 w-20 bg-secondary mt-6 rounded-full"></div>
         </div>
         <div class="flex gap-3">

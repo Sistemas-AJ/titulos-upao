@@ -160,10 +160,7 @@ def get_title_session_proposals(session_id: UUID, session: Session = Depends(get
 @router.delete("/expired", status_code=status.HTTP_204_NO_CONTENT)
 def delete_expired_sessions(session: Session = Depends(get_session)):
     now = datetime.now(timezone.utc)
-    expired_sessions = session.exec(
-        select(TitleSession).where(TitleSession.expires_at < now)
-    ).all()
-    for expired_session in expired_sessions:
-        session.exec(delete(TitleProposal).where(TitleProposal.session_id == expired_session.id))
-        session.delete(expired_session)
+
+    session.exec(delete(TitleProposal).where(TitleProposal.session_id.in_(select(TitleSession.id).where(TitleSession.expires_at < now))))
+    session.exec(delete(TitleSession).where(TitleSession.expires_at < now))
     session.commit()

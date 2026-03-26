@@ -165,7 +165,7 @@ const visiblePages = computed(() => {
     <!-- Header -->
     <header class="flex justify-between items-end mb-8">
       <div>
-        <h2 class="font-display font-bold text-4xl text-primary leading-tight tracking-tight">Base de Datos de Tesis UPAO</h2>
+        <h2 class="font-display font-bold text-4xl text-primary leading-tight tracking-tight">Base de Datos de Tesis</h2>
         <p class="text-text-muted text-lg mt-1 italic">Módulo de consulta interna de títulos e investigaciones registradas.</p>
         <div class="h-1 w-20 bg-secondary mt-4 rounded-full"></div>
       </div>
@@ -361,7 +361,7 @@ const visiblePages = computed(() => {
           </span>
         </div>
         <p class="text-text-muted text-sm leading-relaxed">
-          <em>El equipo de desarrollo pronto habilitará el detalle completo del abstract y la metadata expandida para este título de la base de datos de UPAO.</em>
+          <em>El equipo de desarrollo pronto habilitará el detalle completo del abstract y la metadata expandida para este título de la base de datos de titulos.</em>
         </p>
       </div>
     </div>
