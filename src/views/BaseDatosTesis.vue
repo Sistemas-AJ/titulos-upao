@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
-import { getReferenceTitlesPaged } from '@/services/api'
+import { getReferenceTitlesPaged, exportReferenceTitle } from '@/services/api'
 
 // We map our visual tabs to the specific backend "linea_investigacion" values. 
 // For 'Todos', we will send null/undefined to let the backend return all.
@@ -23,6 +23,39 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const totalItems = ref(0)
 const pageSize = ref(10)
+
+const isExporting = ref(false)
+
+const handleExport = async () => {
+  isExporting.value = true
+  try {
+    const linea = activeTab.value === 'Todos' ? null : activeTab.value
+    
+    // Llamamos a la API con los filtros actuales
+    const blobData = await exportReferenceTitle({
+      linea_investigacion: linea,
+      q: debouncedSearch.value,
+      anio: selectedYear.value || undefined
+    })
+
+    // Magia del navegador para descargar el archivo
+    const url = window.URL.createObjectURL(new Blob([blobData]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `Reporte_Titulos_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    
+    // Limpieza
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error("Error al exportar:", err)
+    alert("Hubo un error al intentar descargar el Excel.")
+  } finally {
+    isExporting.value = false
+  }
+}
 
 const fetchRecords = async () => {
   isLoading.value = true
@@ -169,9 +202,24 @@ const visiblePages = computed(() => {
         <p class="text-text-muted text-lg mt-1 italic">Módulo de consulta interna de títulos e investigaciones registradas.</p>
         <div class="h-1 w-20 bg-secondary mt-4 rounded-full"></div>
       </div>
-      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-background-light border border-border-color px-3 py-2 text-text-muted">
-        <span class="material-symbols-outlined text-sm">cloud_sync</span>
-        API Conectada
+      
+      <div class="flex items-center gap-4">
+        
+        <button
+          @click="handleExport"
+          :disabled="isExporting"
+          class="bg-secondary text-white px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
+          :class="!isExporting ? 'hover:brightness-110 shadow-lg shadow-secondary/20 cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
+        >
+          <span v-if="isExporting" class="material-symbols-outlined animate-spin text-lg">sync</span>
+          <span v-else class="material-symbols-outlined text-lg">description</span>
+          {{ isExporting ? 'Exportando...' : 'Exportar Títulos a Excel' }}
+        </button>
+
+        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-background-light border border-border-color px-3 py-2 text-text-muted">
+          <span class="material-symbols-outlined text-sm">cloud_sync</span>
+          API Conectada
+        </div>
       </div>
     </header>
 

@@ -7,7 +7,7 @@ import reglamentoPdf from '@/assets/reglamento.pdf'
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary text-xl">verified_user</span>
       <p class="text-[13px] text-muted font-body">
-          Usted está utilizando el asistente de generación de tesis v2.2
+          Usted está utilizando el asistente de generación de tesis v2.3
       </p>
     </div>
     <div class="flex items-center gap-4">

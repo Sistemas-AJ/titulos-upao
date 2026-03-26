@@ -1,6 +1,12 @@
+import pandas as pd
+import io
+from fastapi.responses import StreamingResponse
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import or_
 from sqlmodel import Session, select
+
 
 from backend.database.session import get_session
 from backend.models.reference_title import ReferenceTitle
@@ -115,25 +121,6 @@ def create_reference_title(
     return to_reference_title_read(reference_title)
 
 
-@router.get("", response_model=list[ReferenceTitleRead])
-def list_reference_titles(
-    linea_investigacion: str | None = Query(default=None),
-    sub_linea: str | None = Query(default=None),
-    limit: int = Query(default=20, ge=1, le=100),
-    session: Session = Depends(get_session),
-):
-    statement = select(ReferenceTitle)
-    if linea_investigacion:
-        statement = statement.where(
-            ReferenceTitle.linea_investigacion == normalize_reference_line(linea_investigacion)
-        )
-    if sub_linea:
-        statement = statement.where(ReferenceTitle.sub_linea == sub_linea)
-
-    items = session.exec(statement.order_by(ReferenceTitle.created_at.desc()).limit(limit)).all()
-    return [to_reference_title_read(item) for item in items]
-
-
 @router.get("/paged", response_model=ReferenceTitlePage)
 def list_reference_titles_paged(
     linea_investigacion: str | None = Query(default=None),
@@ -221,3 +208,68 @@ def get_reference_catalog(session: Session = Depends(get_session)):
         )
         for line_data in catalog.values()
     ]
+
+@router.get("/export-excel")
+def export_excel_titles(
+    linea_investigacion: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    anio: int | None = Query(default=None),
+    session: Session = Depends(get_session),
+):
+    # 1. Reutilizamos tu lógica de filtrado (sin paginación)
+    statement = select(ReferenceTitle)
+    
+    if linea_investigacion:
+        statement = statement.where(
+            ReferenceTitle.linea_investigacion == normalize_reference_line(linea_investigacion)
+        )
+    if q and q.strip():
+        search_term = f"%{q.strip()}%"
+        statement = statement.where(
+            or_(
+                ReferenceTitle.titulo_investigacion.ilike(search_term),
+                ReferenceTitle.sub_linea.ilike(search_term),
+                ReferenceTitle.authors.ilike(search_term),
+                ReferenceTitle.status.ilike(search_term),
+            )
+        )
+    if anio is not None:
+        statement = statement.where(ReferenceTitle.anio == anio)
+
+    # 2. Ejecutar la consulta completa (sin offset ni limit)
+    items = session.exec(
+        statement.order_by(ReferenceTitle.anio.desc(), ReferenceTitle.created_at.desc())
+    ).all()
+
+    # 3. Convertir a una lista de diccionarios para Pandas
+    # Aquí puedes personalizar los nombres de las columnas que verá el usuario
+    data = [
+        {
+            "Título de Investigación": item.titulo_investigacion,
+            "Autores": item.authors,
+            "Año": item.anio,
+            "Nivel": item.nivel_investigacion,
+            "Línea": item.linea_investigacion,
+            "Sub Línea": item.sub_linea,
+            "Estado": item.status,
+        }
+        for item in items
+    ]
+
+    # 4. Crear el Excel en memoria usando un buffer
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Títulos de Investigación')
+        
+    output.seek(0)
+
+    # 5. Retornar el archivo para descarga directa
+    filename = f"reporte_titulos_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )

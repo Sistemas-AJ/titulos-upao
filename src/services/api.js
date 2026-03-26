@@ -72,3 +72,19 @@ export const getReferenceTitlesPaged = async ({ page = 1, linea_investigacion = 
     return { items: [], total: 0, page: 1, size: 10, pages: 1 }
   }
 }
+
+export const exportReferenceTitle = async ({ linea_investigacion = null, q = null, anio = null } = {}) => {
+  try {
+    const params = {}
+    if (linea_investigacion) params.linea_investigacion = linea_investigacion
+    if (q && q.trim() !== '') params.q = q.trim()
+    if (anio) params.anio = anio
+
+    // IMPORTANTE: agregar responseType: 'blob' para recibir archivos
+    const { data } = await apiClient.get('/reference-titles/export-excel', { params, responseType: 'blob' })
+    return data
+  } catch (error) {
+    console.error('Failed to export reference titles:', error)
+    throw error // Lanzamos el error para que Vue se entere y quite el estado de "Cargando"
+  }
+}
