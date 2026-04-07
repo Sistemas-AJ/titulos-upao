@@ -26,7 +26,7 @@ defineEmits(['toggle-sidebar'])
       </button>
       <span class="material-symbols-outlined text-primary text-xl">verified_user</span>
       <p class="hidden sm:block text-[13px] text-muted font-body">
-          Usted está utilizando el asistente de generación de tesis v2.3
+          Usted está utilizando el asistente de generación de tesis v2.4
       </p>
     </div>
     <div class="flex items-center gap-4">
