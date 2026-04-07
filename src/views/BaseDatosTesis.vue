@@ -193,30 +193,30 @@ const visiblePages = computed(() => {
 </script>
 
 <template>
-  <div class="max-w-[1100px] w-full mx-auto py-12 px-12 flex-1 flex flex-col">
+  <div class="max-w-[1100px] w-full mx-auto px-4 py-6 md:px-8 md:py-12 xl:px-12 flex-1 flex flex-col">
 
     <!-- Header -->
-    <header class="flex justify-between items-end mb-8">
+    <header class="flex flex-col gap-5 md:flex-row md:justify-between md:items-end mb-8">
       <div>
-        <h2 class="font-display font-bold text-4xl text-primary leading-tight tracking-tight">Base de Datos de Tesis</h2>
-        <p class="text-text-muted text-lg mt-1 italic">Módulo de consulta interna de títulos e investigaciones registradas.</p>
+        <h2 class="font-display font-bold text-3xl md:text-4xl text-primary leading-tight tracking-tight">Base de Datos de Tesis</h2>
+        <p class="text-text-muted text-base md:text-lg mt-1 italic">Módulo de consulta interna de títulos e investigaciones registradas.</p>
         <div class="h-1 w-20 bg-secondary mt-4 rounded-full"></div>
       </div>
       
-      <div class="flex items-center gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
         
         <button
           @click="handleExport"
           :disabled="isExporting"
-          class="bg-secondary text-white px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
+          class="w-full sm:w-auto justify-center bg-secondary text-white px-5 md:px-6 py-3 font-bold uppercase tracking-wider text-xs transition-all flex items-center gap-2"
           :class="!isExporting ? 'hover:brightness-110 shadow-lg shadow-secondary/20 cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'"
         >
           <span v-if="isExporting" class="material-symbols-outlined animate-spin text-lg">sync</span>
           <span v-else class="material-symbols-outlined text-lg">description</span>
-          {{ isExporting ? 'Exportando...' : 'Exportar Títulos a Excel' }}
+          {{ isExporting ? 'Exportando...' : 'Exportar a Excel' }}
         </button>
 
-        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider bg-background-light border border-border-color px-3 py-2 text-text-muted">
+        <div class="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider bg-background-light border border-border-color px-3 py-2 text-text-muted">
           <span class="material-symbols-outlined text-sm">cloud_sync</span>
           API Conectada
         </div>
@@ -225,25 +225,25 @@ const visiblePages = computed(() => {
 
     <!-- Search & Filters -->
     <section class="flex flex-col gap-0 mb-0">
-      <div class="flex gap-4 mb-4">
+      <div class="flex flex-col md:flex-row gap-3 md:gap-4 mb-4">
         <div class="relative group flex-1">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
             <span class="material-symbols-outlined">search</span>
           </div>
           <input
             v-model="searchQuery"
-            class="w-full pl-12 pr-4 py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base"
+            class="w-full pl-12 pr-4 py-3.5 md:py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base"
             placeholder="Buscar por título exacto o autor..."
             type="text"
           />
         </div>
-        <div class="relative group w-48 shrink-0">
+        <div class="relative group w-full md:w-48 shrink-0">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary/50 group-focus-within:text-primary transition-colors">
             <span class="material-symbols-outlined">calendar_today</span>
           </div>
           <select
             v-model="selectedYear"
-            class="w-full pl-12 pr-10 py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base appearance-none cursor-pointer"
+            class="w-full pl-12 pr-10 py-3.5 md:py-4 bg-surface border-2 border-border-color focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all text-base appearance-none cursor-pointer"
           >
             <option value="">Cualquier año</option>
             <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
@@ -255,12 +255,12 @@ const visiblePages = computed(() => {
       </div>
 
       <!-- Category Tabs -->
-      <div class="flex border-b border-border-color overflow-x-auto bg-surface px-4">
+      <div class="flex border-b border-border-color overflow-x-auto bg-surface px-2 md:px-4">
         <button
           v-for="tab in tabs"
           :key="tab"
           @click="activeTab = tab"
-          class="px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors capitalize"
+          class="px-4 md:px-6 py-3.5 md:py-4 text-sm font-medium whitespace-nowrap transition-colors capitalize"
           :class="activeTab === tab
             ? 'border-b-[3px] border-primary text-primary font-bold -mb-px'
             : 'text-text-muted hover:text-primary'"
@@ -282,18 +282,18 @@ const visiblePages = computed(() => {
       <div
         v-for="(record, index) in records"
         :key="index"
-        class="p-6 hover:bg-background-light transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group"
+        class="p-4 md:p-6 hover:bg-background-light transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 group"
       >
         <div class="flex-1 flex flex-col gap-2">
-          <div class="flex items-center gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-sm capitalize">{{ record.linea_investigacion }}</span>
             <span class="text-xs text-text-muted font-medium italic capitalize" v-if="record.sub_linea">Sublínea: {{ record.sub_linea }}</span>
           </div>
           <h3 
-            class="font-display font-bold text-lg text-text-main group-hover:text-primary transition-colors cursor-pointer leading-snug"
+            class="font-display font-bold text-base md:text-lg text-text-main group-hover:text-primary transition-colors cursor-pointer leading-snug"
             v-html="highlightMatch(record.titulo_investigacion, debouncedSearch)"
           ></h3>
-          <div class="flex items-center gap-6 text-sm text-text-muted flex-wrap mt-1">
+          <div class="flex items-center gap-3 md:gap-6 text-sm text-text-muted flex-wrap mt-1">
             <span class="flex items-center gap-1.5 capitalize">
               <span class="material-symbols-outlined text-base">person</span>
               <span v-html="highlightMatch(record.authors?.toLowerCase() || 'Desconocido', debouncedSearch)"></span>
@@ -312,10 +312,10 @@ const visiblePages = computed(() => {
             </span>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 self-end md:self-auto">
           <button
             @click="selectedAbstract = record"
-            class="p-2 text-text-muted hover:text-primary transition-colors border border-border-color hover:border-primary"
+            class="p-2.5 text-text-muted hover:text-primary transition-colors border border-border-color hover:border-primary"
             title="Ver Abstract"
           >
             <span class="material-symbols-outlined">subject</span>
@@ -340,13 +340,13 @@ const visiblePages = computed(() => {
     </div>
 
     <!-- Pagination -->
-    <div class="mt-8 flex justify-between items-center pb-8" v-if="totalPages > 0">
-      <div class="text-sm text-text-muted">Página <span class="font-bold text-text-main">{{ currentPage }}</span> de <span class="font-bold text-text-main">{{ totalPages }}</span></div>
-      <nav class="flex items-center gap-1">
+    <div class="mt-8 flex flex-col gap-4 md:flex-row md:justify-between md:items-center pb-8" v-if="totalPages > 0">
+      <div class="text-sm text-text-muted text-center md:text-left">Página <span class="font-bold text-text-main">{{ currentPage }}</span> de <span class="font-bold text-text-main">{{ totalPages }}</span></div>
+      <nav class="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 self-center md:self-auto max-w-full">
         <button 
           @click="prevPage" 
           :disabled="currentPage === 1"
-          class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class="w-10 h-10 shrink-0 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <span class="material-symbols-outlined">chevron_left</span>
         </button>
@@ -355,20 +355,20 @@ const visiblePages = computed(() => {
           <button
             v-if="page !== '...'"
             @click="currentPage = page"
-            class="w-10 h-10 flex items-center justify-center text-sm transition-colors border"
+            class="w-10 h-10 shrink-0 flex items-center justify-center text-sm transition-colors border"
             :class="currentPage === page
               ? 'bg-primary border-primary text-white font-bold shadow-md'
               : 'border-border-color text-text-muted hover:text-primary hover:border-primary'"
           >
             {{ page }}
           </button>
-          <span v-else class="w-10 h-10 flex items-center justify-center text-text-muted font-bold tracking-widest px-1">...</span>
+          <span v-else class="w-10 h-10 shrink-0 flex items-center justify-center text-text-muted font-bold tracking-widest px-1">...</span>
         </template>
         
         <button 
           @click="nextPage" 
           :disabled="currentPage >= totalPages"
-          class="w-10 h-10 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class="w-10 h-10 shrink-0 flex items-center justify-center border border-border-color text-text-muted hover:text-primary hover:border-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <span class="material-symbols-outlined">chevron_right</span>
         </button>
@@ -378,10 +378,10 @@ const visiblePages = computed(() => {
     <!-- Abstract Modal -->
     <div
       v-if="selectedAbstract"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 md:p-8"
       @click.self="selectedAbstract = null"
     >
-      <div class="bg-surface max-w-2xl w-full p-8 shadow-2xl relative">
+      <div class="bg-surface max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 md:p-8 shadow-2xl relative">
         <button
           @click="selectedAbstract = null"
           class="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"
@@ -389,8 +389,8 @@ const visiblePages = computed(() => {
           <span class="material-symbols-outlined">close</span>
         </button>
         <p class="text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">{{ selectedAbstract.linea_investigacion }} <template v-if="selectedAbstract.sub_linea">— {{ selectedAbstract.sub_linea }}</template></p>
-        <h3 class="font-display font-bold text-xl text-primary mb-4 leading-snug">{{ selectedAbstract.titulo_investigacion }}</h3>
-        <div class="flex items-center gap-4 text-sm text-text-muted mb-6 border-b border-border-color pb-4 flex-wrap">
+        <h3 class="font-display font-bold text-lg md:text-xl text-primary mb-4 leading-snug pr-8">{{ selectedAbstract.titulo_investigacion }}</h3>
+        <div class="flex items-center gap-3 md:gap-4 text-sm text-text-muted mb-6 border-b border-border-color pb-4 flex-wrap">
           <span class="flex items-center gap-1.5 capitalize">
             <span class="material-symbols-outlined text-base">person</span>
             {{ selectedAbstract.authors?.toLowerCase() || 'Desconocido' }}
