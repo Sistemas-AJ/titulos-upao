@@ -82,11 +82,11 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <div class="max-w-[1000px] w-full mx-auto p-12 flex-1 flex flex-col">
+  <div class="max-w-[1000px] w-full mx-auto px-4 py-6 md:p-12 flex-1 flex flex-col">
     <!-- Header -->
-    <header class="mb-12">
-      <h2 class="font-display font-bold text-5xl text-primary mb-4">Unidad de Investigación</h2>
-      <p class="text-text-muted text-xl max-w-3xl leading-relaxed">
+    <header class="mb-8 md:mb-12">
+      <h2 class="font-display font-bold text-3xl md:text-5xl text-primary mb-4 leading-tight">Unidad de Investigación</h2>
+      <p class="text-text-muted text-base md:text-xl max-w-3xl leading-relaxed">
         Defina el contexto y el acceso a la información para su estudio contable.
       </p>
       <div class="h-1 w-20 bg-accent mt-6 rounded-full"></div>
@@ -96,16 +96,16 @@ const submitForm = async () => {
     <form @submit.prevent="submitForm" class="w-full flex-1 flex flex-col">
       
       <!-- Row 1: Segmented Control Toggle -->
-      <div class="flex items-start mb-8">
-        <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">¿Dónde realizará la investigación?</label>
-        <div class="flex-grow max-w-[640px]">
-          <div class="inline-flex bg-background-light p-1 w-full border border-border-color">
-            <label class="flex-1 flex items-center justify-center cursor-pointer font-bold text-sm h-10 transition-all"
+      <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6 mb-8">
+        <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">¿Dónde realizará la investigación?</label>
+        <div class="flex-grow max-w-[640px] w-full">
+          <div class="flex flex-col sm:inline-flex sm:flex-row bg-background-light p-1 w-full border border-border-color">
+            <label class="flex-1 flex items-center justify-center cursor-pointer font-bold text-sm min-h-[48px] px-4 text-center transition-all"
                    :class="!isGroup ? 'bg-surface text-primary shadow-sm border border-border-color/50' : 'text-text-muted hover:text-text-main'">
               <input type="radio" v-model="form.scopeType" value="single" class="hidden" />
               Empresa en específico
             </label>
-            <label class="flex-1 flex items-center justify-center cursor-pointer font-bold text-sm h-10 transition-all"
+            <label class="flex-1 flex items-center justify-center cursor-pointer font-bold text-sm min-h-[48px] px-4 text-center transition-all"
                    :class="isGroup ? 'bg-surface text-primary shadow-sm border border-border-color/50' : 'text-text-muted hover:text-text-main'">
               <input type="radio" v-model="form.scopeType" value="group" class="hidden" />
               Conjunto de empresas
@@ -115,10 +115,10 @@ const submitForm = async () => {
       </div>
 
       <!-- Row 2: Checkbox Acceso (Mandatory) -->
-      <div class="flex items-start mb-10">
-        <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">Acceso a información</label>
-        <div class="flex-grow max-w-[640px]">
-          <div class="flex items-start gap-4 p-5 border border-border-color bg-background-light transition-colors hover:border-primary/20">
+      <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6 mb-10">
+        <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">Acceso a información</label>
+        <div class="flex-grow max-w-[640px] w-full">
+          <div class="flex items-start gap-3 md:gap-4 p-4 md:p-5 border border-border-color bg-background-light transition-colors hover:border-primary/20">
             <div class="flex items-center h-6">
               <input 
                 v-model="form.accessConfirmed"
@@ -138,10 +138,10 @@ const submitForm = async () => {
       <!-- Common Fields Container -->
       <div class="space-y-8">
         <!-- Tipo de empresa -->
-        <div class="flex items-start">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">Tipo de empresa</label>
-          <div class="flex-grow max-w-[640px]">
-            <div class="flex gap-10 items-center py-2">
+        <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">Tipo de empresa</label>
+          <div class="flex-grow max-w-[640px] w-full">
+            <div class="flex flex-col sm:flex-row gap-4 sm:gap-10 sm:items-center py-2">
               <label class="flex items-center gap-3 cursor-pointer group">
                 <input v-model="form.companyType" type="radio" value="privada" class="w-5 h-5 text-primary border-border-color focus:ring-primary" />
                 <span class="text-sm font-bold group-hover:text-primary transition-colors" :class="form.companyType === 'privada' ? 'text-primary' : 'text-text-main'">Privada</span>
@@ -155,11 +155,11 @@ const submitForm = async () => {
         </div>
 
         <!-- Nombre / Identificación (Dynamic label) -->
-        <div class="flex items-start">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">
+        <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">
             {{ isGroup ? 'Identificación del grupo' : 'Nombre de la empresa' }}
           </label>
-          <div class="flex-grow max-w-[640px] relative">
+          <div class="flex-grow max-w-[640px] w-full relative">
             <input 
               v-model="form.name"
               type="text" 
@@ -170,9 +170,9 @@ const submitForm = async () => {
         </div>
 
         <!-- Cantidad de empresas (Conditional - Only for Group) -->
-        <div v-if="isGroup" class="flex items-start animate-fadeIn">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">Cantidad aprox. de empresas</label>
-          <div class="flex-grow max-w-[640px]">
+        <div v-if="isGroup" class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6 animate-fadeIn">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">Cantidad aprox. de empresas</label>
+          <div class="flex-grow max-w-[640px] w-full">
             <input 
               v-model.number="form.count"
               type="number" 
@@ -184,11 +184,11 @@ const submitForm = async () => {
         </div>
 
         <!-- Descripción (Dynamic label) -->
-        <div class="flex items-start">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">
+        <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">
             {{ isGroup ? 'Descripción del grupo' : 'Descripción de la empresa' }}
           </label>
-          <div class="flex-grow max-w-[640px]">
+          <div class="flex-grow max-w-[640px] w-full">
             <textarea 
               v-model="form.description"
               class="w-full h-[100px] border border-border-color bg-surface p-4 text-sm text-text-main focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none resize-y"
@@ -198,9 +198,9 @@ const submitForm = async () => {
         </div>
 
         <!-- Giro de negocio -->
-        <div class="flex items-start">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">Giro de negocio</label>
-          <div class="flex-grow max-w-[640px]">
+        <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">Giro de negocio</label>
+          <div class="flex-grow max-w-[640px] w-full">
             <div class="relative">
               <select 
                 v-model="form.sector"
@@ -234,9 +234,9 @@ const submitForm = async () => {
         </div>
 
         <!-- Principal problemática -->
-        <div class="flex items-start">
-          <label class="w-[240px] flex-shrink-0 font-bold pt-3 text-text-main text-sm">Principal problemática</label>
-          <div class="flex-grow max-w-[640px]">
+        <div class="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
+          <label class="w-full md:w-[240px] md:flex-shrink-0 font-bold md:pt-3 text-text-main text-sm">Principal problemática</label>
+          <div class="flex-grow max-w-[640px] w-full">
             <textarea 
               v-model="form.problem"
               class="w-full h-[160px] border border-border-color bg-surface p-4 text-sm text-text-main focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none resize-y"
