@@ -82,28 +82,28 @@ const goNext = () => {
 </script>
 
 <template>
-  <div class="max-w-[1200px] w-full mx-auto p-12 flex-1 flex flex-col">
+  <div class="max-w-[1200px] w-full mx-auto px-4 py-6 md:p-12 flex-1 flex flex-col">
     <!-- Header -->
-    <header class="mb-12">
-      <h2 class="font-display font-bold text-5xl text-primary mb-4">Defina el Nivel de Investigación</h2>
-      <p class="text-text-muted text-xl max-w-3xl leading-relaxed">
+    <header class="mb-8 md:mb-12">
+      <h2 class="font-display font-bold text-3xl md:text-5xl text-primary mb-4 leading-tight">Defina el Nivel de Investigación</h2>
+      <p class="text-text-muted text-base md:text-xl max-w-3xl leading-relaxed">
         Seleccione el alcance metodológico para su tesis en {{ store.step1.subline || 'Auditoría' }}. Esto determinará la profundidad del análisis y la estructura de su marco teórico.
       </p>
     </header>
 
     <!-- Disclaimer -->
-    <div class="mb-10 flex items-center gap-4 p-5 bg-primary/5 border-l-4 border-primary">
-      <span class="material-symbols-outlined text-primary">info</span>
+    <div class="mb-8 md:mb-10 flex items-start gap-3 md:gap-4 p-4 md:p-5 bg-primary/5 border-l-4 border-primary">
+      <span class="material-symbols-outlined text-primary mt-0.5">info</span>
       <p class="text-sm text-text-main">
         <strong class="font-bold">Nota Académica:</strong> La IA proporciona sugerencias basadas en patrones de investigación. Valide siempre la elección con su asesor de tesis según la normativa vigente.
       </p>
     </div>
 
     <!-- Split Layout -->
-    <div class="flex-1 grid grid-cols-[1fr_1.5fr] gap-12 items-start h-full pb-10">
+    <div class="flex-1 grid grid-cols-1 xl:grid-cols-[1fr_1.5fr] gap-6 md:gap-12 items-start h-full pb-8 md:pb-10">
       
       <!-- Left Column: Selection List -->
-      <div class="flex flex-col gap-5">
+      <div class="flex flex-col gap-4 md:gap-5">
         <LevelOption 
           v-for="level in levels" 
           :key="level.value"
@@ -117,45 +117,45 @@ const goNext = () => {
       <!-- Right Column: Context Panel -->
       <transition 
         enter-active-class="transition ease-out duration-300 transform"
-        enter-from-class="opacity-0 translate-x-4"
-        enter-to-class="opacity-100 translate-x-0"
+        enter-from-class="opacity-0 translate-y-4 xl:translate-y-0 xl:translate-x-4"
+        enter-to-class="opacity-100 translate-y-0 translate-x-0"
         leave-active-class="transition ease-in duration-200"
         leave-from-class="opacity-100"
         leave-to-class="opacity-0 hidden"
         mode="out-in"
       >
-        <div :key="selectedLevel" class="bg-surface p-12 border-2 border-border-color shadow-2xl relative h-full flex flex-col justify-center">
-          <div class="absolute top-0 right-0 p-4">
-            <span class="text-primary/10 font-display text-8xl font-black select-none">{{ currentDetails.number }}</span>
+        <div :key="selectedLevel" class="bg-surface p-5 md:p-8 xl:p-12 border-2 border-border-color shadow-2xl relative h-full flex flex-col justify-center overflow-hidden">
+          <div class="absolute top-0 right-0 p-3 md:p-4">
+            <span class="text-primary/10 font-display text-6xl md:text-8xl font-black select-none">{{ currentDetails.number }}</span>
           </div>
 
           <div class="relative z-10 flex-1 flex flex-col">
-            <div class="mb-10">
-              <h3 class="font-display font-bold text-3xl text-primary mb-6">{{ currentDetails.title }}</h3>
+            <div class="mb-8 md:mb-10">
+              <h3 class="font-display font-bold text-2xl md:text-3xl text-primary mb-4 md:mb-6 leading-tight">{{ currentDetails.title }}</h3>
               <p class="text-text-main leading-relaxed text-sm">
                 {{ currentDetails.description }}
               </p>
             </div>
 
-            <div class="mb-12">
-              <h4 class="text-xs font-black uppercase tracking-[0.25em] text-accent mb-6 pb-2 border-b-2 border-accent/20 inline-block">
+            <div class="mb-8 md:mb-12">
+              <h4 class="text-[11px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.25em] text-accent mb-4 md:mb-6 pb-2 border-b-2 border-accent/20 inline-block">
                 Requisitos Académicos
               </h4>
-              <ul class="space-y-4">
-                <li v-for="(req, idx) in currentDetails.requirements" :key="idx" class="flex items-start gap-4 text-text-main">
-                  <span class="material-symbols-outlined text-primary text-xl mt-0.5">check_circle</span>
+              <ul class="space-y-3 md:space-y-4">
+                <li v-for="(req, idx) in currentDetails.requirements" :key="idx" class="flex items-start gap-3 md:gap-4 text-text-main">
+                  <span class="material-symbols-outlined text-primary text-lg md:text-xl mt-0.5">check_circle</span>
                   <span class="text-sm font-medium">{{ req }}</span>
                 </li>
               </ul>
             </div>
 
             <div class="mt-auto">
-              <h4 class="text-xs font-black uppercase tracking-[0.25em] text-accent mb-8 pb-2 border-b-2 border-accent/20 inline-block">
+              <h4 class="text-[11px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.25em] text-accent mb-5 md:mb-8 pb-2 border-b-2 border-accent/20 inline-block">
                 Ejemplos de Títulos
               </h4>
-              <div class="space-y-6">
-                <div v-for="(example, idx) in currentDetails.examples" :key="idx" class="pl-6 border-l-4 border-primary">
-                  <p class="font-display italic text-lg text-text-main leading-tight">
+              <div class="space-y-4 md:space-y-6">
+                <div v-for="(example, idx) in currentDetails.examples" :key="idx" class="pl-4 md:pl-6 border-l-4 border-primary">
+                  <p class="font-display italic text-base md:text-lg text-text-main leading-snug">
                     {{ example }}
                   </p>
                 </div>

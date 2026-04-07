@@ -30,10 +30,10 @@ defineEmits(['next', 'back'])
 </script>
 
 <template>
-  <div class="mt-auto py-8 border-t border-border-color flex items-center justify-between bg-surface relative z-20">
+  <div class="mt-auto py-6 md:py-8 border-t border-border-color flex flex-col gap-4 md:gap-6 md:flex-row md:items-center md:justify-between bg-surface relative z-20">
     
     <!-- Left Area: Can be Back button OR Custom Info Slot -->
-    <div>
+    <div class="w-full md:w-auto">
       <button 
         v-if="showBack"
         @click="$emit('back')" 
@@ -51,7 +51,7 @@ defineEmits(['next', 'back'])
     <button 
       @click="$emit('next')"
       type="button"
-      class="font-bold uppercase tracking-widest text-xs px-12 py-5 transition-all flex items-center gap-4 group"
+      class="w-full md:w-auto justify-center font-bold uppercase tracking-widest text-xs px-6 md:px-12 py-4 md:py-5 transition-all flex items-center gap-4 group"
       :class="{
         'bg-primary text-white shadow-lg hover:shadow-[0_10px_30px_rgba(0,86,163,0.3)] hover:bg-primary/95 cursor-pointer': canContinue && color === 'primary' && !isLoading,
         'bg-secondary text-white shadow-xl shadow-secondary/30 hover:brightness-110 tracking-[0.05em] text-sm rounded-md cursor-pointer': canContinue && color === 'secondary' && !isLoading,

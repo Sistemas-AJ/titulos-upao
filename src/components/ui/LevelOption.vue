@@ -30,7 +30,7 @@ const handleChange = () => {
 </script>
 
 <template>
-  <label class="group relative flex items-start p-8 cursor-pointer border-2 bg-surface transition-all"
+  <label class="group relative flex items-start p-5 md:p-8 cursor-pointer border-2 bg-surface transition-all"
          :class="isChecked ? 'border-primary' : 'border-border-color hover:border-primary/50'">
     <input 
       type="radio" 
@@ -45,19 +45,19 @@ const handleChange = () => {
     <div class="absolute inset-0 border-4 pointer-events-none transition-colors"
          :class="isChecked ? 'border-primary' : 'border-transparent'"></div>
          
-    <div class="flex-1 flex items-center justify-between relative z-10">
-      <div>
-        <span class="font-display font-bold text-xl transition-colors"
+    <div class="flex-1 flex items-start md:items-center justify-between gap-4 relative z-10">
+      <div class="min-w-0">
+        <span class="font-display font-bold text-lg md:text-xl transition-colors leading-tight block"
               :class="isChecked ? 'text-primary' : 'text-text-main group-hover:text-primary'">
           {{ title }}
         </span>
-        <p class="text-[11px] text-text-muted mt-2 font-medium tracking-wide uppercase">
+        <p class="text-[10px] md:text-[11px] text-text-muted mt-2 font-medium tracking-wide uppercase">
           {{ subtitle }}
         </p>
       </div>
       
       <!-- Radio Circle Indicator -->
-       <div class="w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center"
+       <div class="w-7 h-7 md:w-8 md:h-8 rounded-full border-2 transition-all flex items-center justify-center shrink-0 mt-0.5 md:mt-0"
             :class="isChecked ? 'border-primary bg-primary' : 'border-border-color'">
          <div v-if="isChecked" class="w-3 h-3 bg-white rounded-full"></div>
        </div>
