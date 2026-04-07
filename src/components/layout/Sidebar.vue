@@ -3,6 +3,15 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useWizardStore } from '@/store/wizard'
 
+defineProps({
+  isOpen: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['close'])
+
 const route = useRoute()
 const router = useRouter()
 const store = useWizardStore()
@@ -65,21 +74,42 @@ const tools = [
 ]
 
 const isToolActive = (path) => route.path === path
+
+const navigateTo = (path) => {
+  router.push(path)
+  emit('close')
+}
 </script>
 
 <template>
-  <aside class="w-[280px] flex-shrink-0 border-r border-border-color bg-surface flex flex-col h-full z-20 shadow-md" style="background-color: #0056A3;">
+  <aside
+    class="fixed inset-y-0 left-0 z-40 w-[280px] max-w-[85vw] flex-shrink-0 border-r border-border-color bg-surface flex flex-col h-full shadow-md transition-transform duration-300 ease-out lg:static lg:translate-x-0"
+    :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
+    style="background-color: #0056A3;"
+  >
     
     <!-- Brand Header -->
-    <div class="p-8 border-b border-white/20" style="background-color: #0056A3;">
-      <h1 class="font-display font-bold text-xl text-white">Ciencias Economicas</h1>
-      <p class="text-[10px] text-white/70 mt-1 uppercase tracking-widest font-bold">Explorador de Tesis</p>
+    <div class="p-6 lg:p-8 border-b border-white/20" style="background-color: #0056A3;">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="font-display font-bold text-xl text-white">Ciencias Economicas</h1>
+          <p class="text-[10px] text-white/70 mt-1 uppercase tracking-widest font-bold">Explorador de Tesis</p>
+        </div>
+        <button
+          type="button"
+          class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          aria-label="Cerrar menú lateral"
+          @click="emit('close')"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
     </div>
     
     <div class="flex flex-col flex-1 overflow-y-auto">
 
       <!-- ==================== WIZARD STEPS SECTION ==================== -->
-      <nav class="flex-shrink-0 p-8">
+      <nav class="flex-shrink-0 p-6 lg:p-8">
         <p class="text-[9px] uppercase tracking-[0.15em] font-bold text-white/40 mb-6">Flujo de Trabajo</p>
         <ul class="relative border-l-2 ml-3 space-y-8" style="border-color: rgba(255, 255, 255, 0.2);">
           
@@ -120,7 +150,7 @@ const isToolActive = (path) => route.path === path
           <!-- Has existing progress: offer to continue OR reset -->
           <template v-if="store.hasProgress">
             <button 
-              @click="$router.push(`/paso-${store.lastCompletedStep}`)"
+              @click="navigateTo(`/paso-${store.lastCompletedStep}`)"
               class="w-full flex items-center justify-center gap-2 py-3 bg-secondary text-white text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-black/20"
             >
               <span class="material-symbols-outlined text-base">play_arrow</span>
@@ -137,7 +167,7 @@ const isToolActive = (path) => route.path === path
           <!-- No progress yet -->
           <button 
             v-else
-            @click="$router.push('/paso-1')"
+            @click="navigateTo('/paso-1')"
             class="w-full flex items-center justify-center gap-2 py-3 bg-secondary text-white text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-black/20"
           >
             <span class="material-symbols-outlined text-base">add_circle</span>
@@ -148,12 +178,12 @@ const isToolActive = (path) => route.path === path
       </nav>
 
       <!-- ==================== HERRAMIENTAS SECTION ==================== -->
-      <div class="px-8 pb-8 border-t border-white/10 pt-6">
+      <div class="px-6 lg:px-8 pb-8 border-t border-white/10 pt-6">
         <p class="text-[9px] uppercase tracking-[0.15em] font-bold text-white/40 mb-4">Herramientas</p>
         <ul class="space-y-1">
           <li v-for="tool in tools" :key="tool.path">
             <button
-              @click="$router.push(tool.path)"
+              @click="navigateTo(tool.path)"
               class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-all"
               :class="isToolActive(tool.path)
                 ? 'bg-white/15 text-white border-l-2 border-secondary pl-[10px]'
